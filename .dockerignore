@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+
+.cache
+.env
+.vercel
+.output
+.idea
+/build
+/public/build
+/api/_build
+/api/index.js
+.env.fly
+.env.supabase
+.env.mongo
+
