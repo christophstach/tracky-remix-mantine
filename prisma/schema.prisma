@@ -36,9 +36,9 @@ model Task {
 }
 
 model TimeTrack {
-  id     String   @id @default(cuid())
+  id     String    @id @default(cuid())
   start  DateTime
-  end    DateTime
-  task   Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  end    DateTime?
+  task   Task?     @relation(fields: [taskId], references: [id], onDelete: SetNull)
   taskId String?
 }
