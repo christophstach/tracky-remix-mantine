@@ -1,5 +1,5 @@
 import type { DataFunctionArgs } from '@remix-run/node';
-import { db } from '~/utils/db.server';
+
 import { Form, useActionData, useLoaderData, useTransition } from '@remix-run/react';
 import { ActionIcon, Box, Stack, Table, Title } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
@@ -8,12 +8,14 @@ import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import { useEffect, useState } from 'react';
 import { useInterval } from '@mantine/hooks';
 import dayjs from 'dayjs';
+import { db } from '~/services/db.server';
+import { authenticator } from '~/services/auth.server';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
     const formData = await request.formData();
     const action = formData.get('action');
-
+    const user = authenticator.isAuthenticated(request);
 
     switch (action) {
         case 'startTimer':
@@ -31,6 +33,7 @@ export async function action({ request, params }: DataFunctionArgs) {
                 },
                 where: {
                     end: null,
+
                 },
             });
     }
@@ -91,7 +94,6 @@ export default function Index() {
     return (
         <>
             <Stack align="center">
-
                 <Box sx={{ height: '48px' }}>
                     {
                         loaderData.timeTrack ? (
@@ -141,7 +143,6 @@ export default function Index() {
                             </ActionIcon>
                         )
                     }
-
                 </Form>
 
 

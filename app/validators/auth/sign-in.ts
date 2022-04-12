@@ -1,10 +1,11 @@
-import { date, object } from 'yup';
 import { formDataToObject, validateWithSchema } from '~/utils/helpers';
+import { object, string } from 'yup';
 
-export async function validateStartTimer(formData: FormData) {
+export async function validateSignIn(formData: FormData) {
     const schema = object({
-        start: date().required()
-    });
+        email: string().required(),
+        password: string().required(),
+    })
 
     return validateWithSchema(
         formDataToObject(
