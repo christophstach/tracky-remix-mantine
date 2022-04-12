@@ -1,13 +1,14 @@
 import type { DataFunctionArgs } from '@remix-run/node';
 import { db } from '~/utils/db.server';
 import { Form, useActionData, useLoaderData } from '@remix-run/react';
-import { ActionIcon, Stack, Title } from '@mantine/core';
+import { ActionIcon, Box, Stack, Table, Title } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
-import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-import { useLayoutEffect, useState } from 'react';
 
-dayjs.extend(duration);
+
+import { useEffect, useState } from 'react';
+import { useInterval } from '@mantine/hooks';
+import dayjs from 'dayjs';
+
 
 export async function action({ request, params }: DataFunctionArgs) {
     const formData = await request.formData();
@@ -39,44 +40,67 @@ export async function action({ request, params }: DataFunctionArgs) {
 }
 
 export async function loader({ request }: DataFunctionArgs) {
+    const timeTracks = await db.timeTrack.findMany();
+
     const timeTrack = await db.timeTrack.findFirst({
         where: {
             end: null,
         },
     });
 
-    return { timeTrack };
+
+    return { timeTracks, timeTrack };
 }
 
 export default function Index() {
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const [ timer, setTimer ] = useState<string | null>(null);
+    const interval = useInterval(() => {
+        if (loaderData.timeTrack) {
+            setTimer(calculateDuration(loaderData.timeTrack.start, new Date()));
+        }
+    }, 1000);
 
-
-    useLayoutEffect(() => {
-        setInterval(() => {
+    useEffect(() => {
+        console.log('useEffect');
+        if (loaderData.timeTrack) {
+            console.log('interval.start()');
             if (loaderData.timeTrack) {
-                setTimer(
-                    dayjs.duration(dayjs().diff(loaderData.timeTrack.start)).format('HH:mm:ss')
-                );
-            } else {
-                setTimer(null);
+                setTimer(calculateDuration(loaderData.timeTrack.start, new Date()));
             }
-        }, 1000);
+            interval.start();
+        } else {
+            console.log('interval.stop()');
+            setTimer('');
+            interval.stop();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [ loaderData.timeTrack ]);
+
+
+    function calculateDuration(startDate: Date, endDate:  Date) {
+        const start = dayjs(startDate);
+        const end = dayjs(endDate);
+        const diff = end.diff(start);
+        const duration = dayjs.duration(diff);
+        return duration.format('HH:mm:ss');
+    }
 
 
     return (
         <>
             <Stack align="center">
 
-                {
-                    loaderData.timeTrack ? (
-                        <Title>{dayjs.duration(dayjs().diff(loaderData.timeTrack.start)).format('HH:mm:ss')}</Title>
-                    ) : null
-                }
+                <Box sx={{ height: '48px' }}>
+                    {
+                        loaderData.timeTrack ? (
+                            <Title>{timer}</Title>
+                        ) : null
+                    }
+                </Box>
+
+
                 <Form method="post">
                     {
                         loaderData.timeTrack ? (
@@ -87,11 +111,11 @@ export default function Index() {
                                     type="submit"
                                     name="action"
                                     value="stopTimer"
-                                    variant="light"
-                                    size="xl"
-                                    radius="xl"
+                                    variant="filled"
+                                    size={128}
+                                    radius={128}
                                     color="indigo">
-                                    <IconPlayerStop />
+                                    <IconPlayerStop size={100} />
                                 </ActionIcon>
                             </>
 
@@ -101,11 +125,11 @@ export default function Index() {
                                 type="submit"
                                 name="action"
                                 value="startTimer"
-                                variant="light"
-                                size="xl"
-                                radius="xl"
+                                variant="filled"
+                                size={128}
+                                radius={128}
                                 color="indigo">
-                                <IconPlayerPlay />
+                                <IconPlayerPlay size={100} />
                             </ActionIcon>
                         )
                     }
@@ -113,8 +137,26 @@ export default function Index() {
                 </Form>
 
 
-                <pre>{JSON.stringify(actionData, null, 2)}</pre>
-                <pre>{JSON.stringify(loaderData, null, 2)}</pre>
+                <Table>
+                    <thead>
+                    <tr>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Duration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {
+                        loaderData.timeTracks.map(({ id, start, end }) => (
+                            <tr key={id}>
+                                <td>{dayjs(start).format('HH:mm:ss')}</td>
+                                <td>{end ? dayjs(end).format('HH:mm:ss') : '-'}</td>
+                                <td>{end ?  calculateDuration(start, end) : 'Running...'}</td>
+                            </tr>
+                        ))
+                    }
+                    </tbody>
+                </Table>
             </Stack>
         </>
     );

@@ -1,6 +1,11 @@
 import type { MetaFunction } from '@remix-run/node';
 import { Links, LiveReload, Meta, Outlet, Scripts, ScrollRestoration, } from '@remix-run/react';
 import styles from '~/styles/global.css';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+
+dayjs.extend(duration);
+
 
 export function links() {
     return [
