@@ -1,6 +1,6 @@
 import type { DataFunctionArgs } from '@remix-run/node';
 import { db } from '~/utils/db.server';
-import { Form, useActionData, useLoaderData } from '@remix-run/react';
+import { Form, useActionData, useLoaderData, useTransition } from '@remix-run/react';
 import { ActionIcon, Box, Stack, Table, Title } from '@mantine/core';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 
@@ -53,6 +53,7 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export default function Index() {
+    const transition = useTransition();
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
 
@@ -78,15 +79,17 @@ export default function Index() {
     }, [ loaderData.timeTrack ]);
 
 
-    function calculateDuration(startDate: Date, endDate:  Date) {
+    function calculateDuration(startDate: Date, endDate: Date) {
         const start = dayjs(startDate);
         const end = dayjs(endDate);
         const diff = end.diff(start);
         const duration = dayjs.duration(diff);
-        
+
         return duration.format('HH:mm:ss');
     }
 
+
+    console.log(transition)
 
     return (
         <>
@@ -105,17 +108,20 @@ export default function Index() {
                     {
                         loaderData.timeTrack ? (
                             <>
-
-
                                 <ActionIcon
                                     type="submit"
                                     name="action"
                                     value="stopTimer"
                                     variant="filled"
+                                    color="indigo"
                                     size={128}
                                     radius={128}
-                                    color="indigo">
-                                    <IconPlayerStop size={100} />
+                                    loading={
+                                        transition.state === 'submitting' ||
+                                        transition.state === 'loading'
+                                    }
+                                >
+                                    <IconPlayerStop size={90} />
                                 </ActionIcon>
                             </>
 
@@ -126,10 +132,15 @@ export default function Index() {
                                 name="action"
                                 value="startTimer"
                                 variant="filled"
+                                color="indigo"
                                 size={128}
                                 radius={128}
-                                color="indigo">
-                                <IconPlayerPlay size={100} />
+                                loading={
+                                    transition.state === 'submitting' ||
+                                    transition.state === 'loading'
+                                }
+                            >
+                                <IconPlayerPlay size={90} />
                             </ActionIcon>
                         )
                     }
@@ -151,7 +162,7 @@ export default function Index() {
                             <tr key={id}>
                                 <td>{dayjs(start).format('HH:mm:ss')}</td>
                                 <td>{end ? dayjs(end).format('HH:mm:ss') : '-'}</td>
-                                <td>{end ?  calculateDuration(start, end) : 'Running...'}</td>
+                                <td>{end ? calculateDuration(start, end) : 'Running...'}</td>
                             </tr>
                         ))
                     }
