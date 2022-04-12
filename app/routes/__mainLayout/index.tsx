@@ -55,23 +55,22 @@ export async function loader({ request }: DataFunctionArgs) {
 export default function Index() {
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
-    const [ timer, setTimer ] = useState<string | null>(null);
+
     const interval = useInterval(() => {
         if (loaderData.timeTrack) {
             setTimer(calculateDuration(loaderData.timeTrack.start, new Date()));
         }
     }, 1000);
 
+    const [ timer, setTimer ] = useState<string | null>(null);
+
     useEffect(() => {
-        console.log('useEffect');
         if (loaderData.timeTrack) {
-            console.log('interval.start()');
             if (loaderData.timeTrack) {
                 setTimer(calculateDuration(loaderData.timeTrack.start, new Date()));
             }
             interval.start();
         } else {
-            console.log('interval.stop()');
             setTimer('');
             interval.stop();
         }
@@ -84,6 +83,7 @@ export default function Index() {
         const end = dayjs(endDate);
         const diff = end.diff(start);
         const duration = dayjs.duration(diff);
+        
         return duration.format('HH:mm:ss');
     }
 
