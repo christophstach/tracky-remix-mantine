@@ -17,11 +17,9 @@ const useStyles = createStyles((theme, _params, getRef) => {
                 width: '100%',
                 height: '100%',
                 opacity: '0.4',
-                // backgroundImage: 'url(\'/sonja-langford-eIkbSc3SDtI-unsplash.jpg\')',
-                // backgroundImage: 'url(\'/pexels-shawn-stutzman-1010513.jpg\')',
                 backgroundImage: 'url(\'/kevin-andre-ePBkyKJP77A-unsplash.jpg\')',
                 backgroundRepeat: 'no-repeat',
-                backgroundPosition: '0px -1300px',
+                backgroundPosition: '0px -300px',
                 backgroundAttachment: 'fixed',
                 backgroundSize: 'cover',
             }
@@ -49,7 +47,6 @@ export async function loader({ request }: DataFunctionArgs) {
 
 export default function MainLayout() {
     const { classes, theme } = useStyles();
-
 
     return (
         <Box className={classes.pageWrapper}>

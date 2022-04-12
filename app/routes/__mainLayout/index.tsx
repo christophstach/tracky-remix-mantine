@@ -88,9 +88,6 @@ export default function Index() {
         return duration.format('HH:mm:ss');
     }
 
-
-    console.log(transition)
-
     return (
         <>
             <Stack align="center">
