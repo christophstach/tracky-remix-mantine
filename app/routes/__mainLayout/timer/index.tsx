@@ -243,9 +243,7 @@ export default function TimerIndex() {
 
     return (
         <>
-
             {loaderData.defaultActivity ? (
-
                 <fetcher.Form method="post">
                     <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                         <Card shadow="sm" p="md">
@@ -435,7 +433,6 @@ export default function TimerIndex() {
                         </Card>
                     </MediaQuery>
                 </fetcher.Form>
-
             ) : (
                 <Card shadow="sm" p="md">
                     <Text>
@@ -444,6 +441,7 @@ export default function TimerIndex() {
                     </Text>
                 </Card>
             )}
+
             {loaderData.timeTracks.map((timeTrack) => {
                 return (
                     <TimeTrackRow
