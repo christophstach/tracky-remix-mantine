@@ -1,10 +1,6 @@
 import { Form, useActionData, useFetcher, useLoaderData, useParams, useTransition } from '@remix-run/react';
-
 import { Card, Group, Select, Textarea, TextInput } from '@mantine/core';
-import React from 'react';
-
 import { db } from '~/services/db.server';
-
 import { DataFunctionArgs, redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';

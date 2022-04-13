@@ -1,14 +1,17 @@
 import { DataFunctionArgs } from '@remix-run/node';
-import { Form, useActionData, useLoaderData, useTransition } from '@remix-run/react';
-import { forbidden, notFound } from 'remix-utils';
+import { useFetcher, useLoaderData } from '@remix-run/react';
+import { forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
 import { ActionIcon, Box, Card, Group, Select, Text } from '@mantine/core';
 import { forwardRef, useEffect, useState } from 'react';
-import { IconPlayerPlay, IconPlayerStop, IconTrash } from '@tabler/icons';
+import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import { validateTimer } from '~/validators/time-tracks/timer';
 import { toDuration } from '~/utils/helpers';
 import { useInterval } from '@mantine/hooks';
+import dayjs from 'dayjs';
+import { TimeTrackRow } from '~/components/TimeTrackRow';
+import { Activity } from '@prisma/client';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
@@ -46,6 +49,8 @@ export async function action({ request, params }: DataFunctionArgs) {
                     activityId: data.activityId,
                 }
             });
+
+            return redirectBack(request, { fallback: '/timer' });
         } else if (data.operation === 'stop') {
             await db.timeTrack.updateMany({
                 data: {
@@ -65,13 +70,13 @@ export async function action({ request, params }: DataFunctionArgs) {
                 }
             });
         }
+
+        return redirectBack(request, { fallback: '/timer' });
     } else {
         console.log('failure', fieldErrors);
 
         return { fieldErrors };
     }
-
-    return {};
 }
 
 export async function loader({ request }: DataFunctionArgs) {
@@ -95,6 +100,9 @@ export async function loader({ request }: DataFunctionArgs) {
     });
 
     const timeTracks = await db.timeTrack.findMany({
+        orderBy: {
+            end: 'desc'
+        },
         include: {
             activity: {
                 include: {
@@ -154,12 +162,61 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    return { currentTimeTrack, timeTracks, activities };
+    let defaultActivity: Activity | null;
+
+    const userDefaults = await db.user.findFirst({
+        where: {
+            id: user.id
+        },
+        include: {
+            defaultClient: {
+                include: {
+                    defaultProject: {
+                        include: {
+                            defaultActivity: true
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (userDefaults?.defaultClient?.defaultProject?.defaultActivity) {
+        defaultActivity = userDefaults.defaultClient.defaultProject.defaultActivity;
+    } else {
+        defaultActivity = await db.activity.findFirst({
+            orderBy: [
+                {
+                    name: 'asc',
+                },
+                {
+                    project: {
+                        name: 'asc',
+                    }
+                },
+                {
+                    project: {
+                        client: {
+                            name: 'asc',
+                        }
+                    }
+                }
+            ],
+            where: {
+                project: {
+                    client: {
+                        userId: user.id
+                    }
+                }
+            },
+        });
+    }
+
+    return { currentTimeTrack, timeTracks, activities, defaultActivity };
 }
 
 export default function TimerIndex() {
-    const transition = useTransition();
-    const actionData = useActionData<InferDataFunction<typeof action>>();
+    const fetcher = useFetcher();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
 
     const [ timer, setTimer ] = useState<string | null>(null);
@@ -185,112 +242,113 @@ export default function TimerIndex() {
     return (
         <>
             <Card shadow="sm" p="md">
-                <Form method="post">
-                    <Group>
-                        <Box sx={{ flex: 1 }}>
-                            <Select
-                                searchable
-                                size="md"
-                                name="activityId"
-                                error={actionData?.fieldErrors?.activityId}
-                                defaultValue={loaderData.currentTimeTrack?.activityId}
-                                data={loaderData.activities.map(activity => {
-                                    return {
-                                        label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
-                                        value: activity.id,
-                                        ...activity
-                                    };
-                                })}
-                                filter={(value, item) =>
-                                    item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                    item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                    item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
-                                }
-                                itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
-                                    {
-                                        name,
-                                        project,
-                                        ...others
-                                    },
-                                    ref
-                                ) => (
-                                    <div ref={ref} {...others}>
-                                        <Box>
-                                            <Text size="sm">{name}</Text>
-                                            <Text
-                                                size="xs"
-                                                color="dimmed"
-                                            >{project.name} für {project.client.name}</Text>
-                                        </Box>
-                                    </div>
-                                ))}
-                            />
-                        </Box>
-                        <Box>
-                            {timer}
-                        </Box>
-                        <Box>
-                            {loaderData.currentTimeTrack ? (
-                                <ActionIcon
-                                    type="submit"
-                                    name="operation"
-                                    value="stop"
-                                    variant="light"
-                                    color="indigo"
-                                    size="lg"
-                                    radius="lg"
-                                    loading={
-                                        transition.state === 'submitting' ||
-                                        transition.state === 'loading'
-                                    }
-                                >
-                                    <IconPlayerStop />
-                                </ActionIcon>
-                            ) : (
-                                <ActionIcon
-                                    type="submit"
-                                    name="operation"
-                                    value="start"
-                                    variant="light"
-                                    color="indigo"
-                                    size="lg"
-                                    radius="lg"
-                                    loading={
-                                        transition.state === 'submitting' ||
-                                        transition.state === 'loading'
-                                    }
-                                >
-                                    <IconPlayerPlay />
-                                </ActionIcon>
-                            )}
-
-                        </Box>
-                    </Group>
-                </Form>
-            </Card>
-
-            {loaderData.timeTracks.map((timeTrack) => {
-                return (
-                    <Card key={timeTrack.id} shadow="sm" p="md" mt="md">
+                {loaderData.defaultActivity ? (
+                    <fetcher.Form method="post">
                         <Group>
                             <Box sx={{ flex: 1 }}>
-                                {timeTrack.activity.project.client.name}: {timeTrack.activity.project.name} - {timeTrack.activity.name}
+                                <Select
+                                    searchable
+                                    size="md"
+                                    name="activityId"
+                                    error={fetcher.data?.fieldErrors?.activityId}
+                                    defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
+                                    data={loaderData.activities.map(activity => {
+                                        return {
+                                            label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
+                                            value: activity.id,
+                                            ...activity
+                                        };
+                                    })}
+                                    filter={(value, item) =>
+                                        item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                    }
+                                    itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
+                                        {
+                                            name,
+                                            project,
+                                            ...others
+                                        },
+                                        ref
+                                    ) => (
+                                        <div ref={ref} {...others}>
+                                            <Box>
+                                                <Text size="sm">{name}</Text>
+                                                <Text
+                                                    size="xs"
+                                                    color="dimmed"
+                                                >{project.name} für {project.client.name}</Text>
+                                            </Box>
+                                        </div>
+                                    ))}
+                                />
+                            </Box>
+                            {loaderData.currentTimeTrack ? (
+                                <Box sx={{ width: '155px' }}>
+                                    {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
+                                </Box>
+                            ) : (
+                                <Box sx={{ width: '155px' }}></Box>
+                            )}
+                            <Box>
+                                <strong>
+                                    {timer}
+                                </strong>
                             </Box>
                             <Box>
-                                {timeTrack.end && toDuration(timeTrack.start, timeTrack.end)}
-                            </Box>
-                            <Box>
-                                <ActionIcon
-                                    variant="light"
-                                    color="red"
-                                    size="lg"
-                                    radius="lg"
-                                >
-                                    <IconTrash />
-                                </ActionIcon>
+                                {loaderData.currentTimeTrack ? (
+                                    <ActionIcon
+                                        type="submit"
+                                        name="operation"
+                                        value="stop"
+                                        variant="light"
+                                        color="indigo"
+                                        size="lg"
+                                        radius="lg"
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
+                                        }
+                                    >
+                                        <IconPlayerStop />
+                                    </ActionIcon>
+                                ) : (
+                                    <ActionIcon
+                                        type="submit"
+                                        name="operation"
+                                        value="start"
+                                        variant="light"
+                                        color="indigo"
+                                        size="lg"
+                                        radius="lg"
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
+                                        }
+                                    >
+                                        <IconPlayerPlay />
+                                    </ActionIcon>
+                                )}
                             </Box>
                         </Group>
-                    </Card>
+                    </fetcher.Form>
+                ) : (
+                    <Text>
+                        Noch keine Taetigkeit vorhanden. Legen Sie bitte zuerst Klienten, Projekte und Taetigkeiten
+                        an.
+                    </Text>
+                )}
+            </Card>
+            {loaderData.timeTracks.map((timeTrack) => {
+                return (
+                    <TimeTrackRow
+                        key={timeTrack.id}
+                        timeTrack={timeTrack}
+                        activity={timeTrack.activity}
+                        project={timeTrack.activity.project}
+                        client={timeTrack.activity.project.client}
+                    />
                 );
             })}
         </>

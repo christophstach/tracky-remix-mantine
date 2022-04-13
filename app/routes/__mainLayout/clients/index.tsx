@@ -8,6 +8,9 @@ import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
 import TopActions from '~/components/TopActions';
+import { authenticator } from '~/services/auth.server';
+import { DataFunctionArgs } from '@remix-run/node';
+import { forbidden } from 'remix-utils';
 
 
 export const handle = {
@@ -39,8 +42,17 @@ export function CatchBoundary() {
     return null;
 }
 
-export async function loader() {
+export async function loader({ request }: DataFunctionArgs) {
+    const user = await authenticator.isAuthenticated(request);
+
+    if (!user) {
+        throw forbidden('Not allowed');
+    }
+
     const clients = await db.client.findMany({
+        where: {
+            userId: user.id
+        },
         orderBy: {
             name: 'asc'
         },
