@@ -1,10 +1,9 @@
 import { useFetcher } from '@remix-run/react';
-import { ActionIcon, Box, Button, Card, Group, Stack, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Box, Button, Card, Group, MediaQuery, Stack } from '@mantine/core';
 import dayjs from 'dayjs';
 import { toDuration } from '~/utils/helpers';
 import { IconTrash } from '@tabler/icons';
 import { Activity, Client, Project, TimeTrack } from '@prisma/client'
-import { useMediaQuery } from '@mantine/hooks';
 
 interface TimeTrackRowProps {
     timeTrack: TimeTrack;
@@ -14,14 +13,12 @@ interface TimeTrackRowProps {
 }
 
 export function TimeTrackRow(props: TimeTrackRowProps) {
-    const theme = useMantineTheme();
-    const smallerThanMd = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
     const fetcher = useFetcher();
     const { timeTrack, activity, project, client } = props;
 
     return (
         <fetcher.Form method="delete" action={`/time-tracks/${timeTrack.id}`}>
-            {smallerThanMd ? (
+            <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Card shadow="sm" p="md" mt="md">
                     <Stack align="stretch">
                         <Box>
@@ -52,7 +49,9 @@ export function TimeTrackRow(props: TimeTrackRowProps) {
                         </Box>
                     </Stack>
                 </Card>
-            ) : (
+            </MediaQuery>
+
+            <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                 <Card shadow="sm" p="md" mt="md">
                     <Group>
                         <Box sx={{ flex: 1 }}>
@@ -83,8 +82,7 @@ export function TimeTrackRow(props: TimeTrackRowProps) {
                         </Box>
                     </Group>
                 </Card>
-            )}
-
+            </MediaQuery>
         </fetcher.Form>
-    )
+    );
 }

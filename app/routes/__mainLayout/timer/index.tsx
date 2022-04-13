@@ -3,7 +3,7 @@ import { useFetcher, useLoaderData } from '@remix-run/react';
 import { forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
-import { ActionIcon, Box, Button, Card, Select, Text, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Box, Button, Card, Group, MediaQuery, Select, Stack, Text, useMantineTheme } from '@mantine/core';
 import { forwardRef, useEffect, useState } from 'react';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import { validateTimer } from '~/validators/time-tracks/timer';
@@ -245,68 +245,64 @@ export default function TimerIndex() {
         <>
 
             {loaderData.defaultActivity ? (
-                <Card shadow="sm" p="md">
-                    <fetcher.Form method="post">
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: smallerThanMd ? 'stretch' : 'center',
-                            flexDirection: smallerThanMd ? 'column' : 'row',
-                            gap: theme.spacing.md,
-                        }}>
-                            <Box sx={{ flex: 1 }}>
-                                <Select
-                                    searchable
-                                    size="md"
-                                    name="activityId"
-                                    error={fetcher.data?.fieldErrors?.activityId}
-                                    defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
-                                    data={loaderData.activities.map(activity => {
-                                        return {
-                                            label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
-                                            value: activity.id,
-                                            ...activity
-                                        };
-                                    })}
-                                    filter={(value, item) =>
-                                        item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                        item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                        item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
-                                    }
-                                    itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
-                                        {
-                                            name,
-                                            project,
-                                            ...others
-                                        },
-                                        ref
-                                    ) => (
-                                        <div ref={ref} {...others}>
-                                            <Box>
-                                                <Text size="sm">{name}</Text>
-                                                <Text
-                                                    size="xs"
-                                                    color="dimmed"
-                                                >{project.name} für {project.client.name}</Text>
-                                            </Box>
-                                        </div>
-                                    ))}
-                                />
-                            </Box>
-                            {loaderData.currentTimeTrack ? (
-                                <Box sx={{ width: '155px' }}>
-                                    {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
+
+                <fetcher.Form method="post">
+                    <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                        <Card shadow="sm" p="md">
+                            <Stack align="stretch">
+                                <Box>
+                                    <Select
+                                        searchable
+                                        size="md"
+                                        name="activityId"
+                                        error={fetcher.data?.fieldErrors?.activityId}
+                                        defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
+                                        data={loaderData.activities.map(activity => {
+                                            return {
+                                                label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
+                                                value: activity.id,
+                                                ...activity
+                                            };
+                                        })}
+                                        filter={(value, item) =>
+                                            item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                            item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                            item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                        }
+                                        itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
+                                            {
+                                                name,
+                                                project,
+                                                ...others
+                                            },
+                                            ref
+                                        ) => (
+                                            <div ref={ref} {...others}>
+                                                <Box>
+                                                    <Text size="sm">{name}</Text>
+                                                    <Text
+                                                        size="xs"
+                                                        color="dimmed"
+                                                    >{project.name} für {project.client.name}</Text>
+                                                </Box>
+                                            </div>
+                                        ))}
+                                    />
                                 </Box>
-                            ) : (
-                                <Box sx={{ width: '155px' }}></Box>
-                            )}
-                            <Box>
-                                <strong>
-                                    {timer}
-                                </strong>
-                            </Box>
-                            <Box>
                                 {loaderData.currentTimeTrack ? (
-                                    smallerThanMd ? (
+                                    <Box>
+                                        {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
+                                    </Box>
+                                ) : (
+                                    <Box></Box>
+                                )}
+                                <Box>
+                                    <strong>
+                                        {timer}
+                                    </strong>
+                                </Box>
+                                <Box>
+                                    {loaderData.currentTimeTrack ? (
                                         <Button
                                             sx={{ width: '100%' }}
                                             type="submit"
@@ -323,24 +319,6 @@ export default function TimerIndex() {
                                             Stop
                                         </Button>
                                     ) : (
-                                        <ActionIcon
-                                            type="submit"
-                                            name="operation"
-                                            value="stop"
-                                            variant="light"
-                                            color="indigo"
-                                            size="lg"
-                                            radius="lg"
-                                            loading={
-                                                fetcher.state === 'submitting' ||
-                                                fetcher.state === 'loading'
-                                            }
-                                        >
-                                            <IconPlayerStop />
-                                        </ActionIcon>
-                                    )
-                                ) : (
-                                    smallerThanMd ? (
                                         <Button
                                             sx={{ width: '100%' }}
                                             type="submit"
@@ -356,7 +334,85 @@ export default function TimerIndex() {
                                         >
                                             Start
                                         </Button>
+                                    )}
+                                </Box>
+                            </Stack>
+                        </Card>
+                    </MediaQuery>
+
+                    <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                        <Card shadow="sm" p="md">
+                            <Group>
+                                <Box sx={{ flex: 1 }}>
+                                    <Select
+                                        searchable
+                                        size="md"
+                                        name="activityId"
+                                        error={fetcher.data?.fieldErrors?.activityId}
+                                        defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
+                                        data={loaderData.activities.map(activity => {
+                                            return {
+                                                label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
+                                                value: activity.id,
+                                                ...activity
+                                            };
+                                        })}
+                                        filter={(value, item) =>
+                                            item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                            item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                            item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                        }
+                                        itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
+                                            {
+                                                name,
+                                                project,
+                                                ...others
+                                            },
+                                            ref
+                                        ) => (
+                                            <div ref={ref} {...others}>
+                                                <Box>
+                                                    <Text size="sm">{name}</Text>
+                                                    <Text
+                                                        size="xs"
+                                                        color="dimmed"
+                                                    >{project.name} für {project.client.name}</Text>
+                                                </Box>
+                                            </div>
+                                        ))}
+                                    />
+                                </Box>
+                                {loaderData.currentTimeTrack ? (
+                                    <Box sx={{ width: '155px' }}>
+                                        {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
+                                    </Box>
+                                ) : (
+                                    <Box sx={{ width: '155px' }}></Box>
+                                )}
+                                <Box>
+                                    <strong>
+                                        {timer}
+                                    </strong>
+                                </Box>
+                                <Box>
+                                    {loaderData.currentTimeTrack ? (
+                                        <ActionIcon
+                                            type="submit"
+                                            name="operation"
+                                            value="stop"
+                                            variant="light"
+                                            color="indigo"
+                                            size="lg"
+                                            radius="lg"
+                                            loading={
+                                                fetcher.state === 'submitting' ||
+                                                fetcher.state === 'loading'
+                                            }
+                                        >
+                                            <IconPlayerStop />
+                                        </ActionIcon>
                                     ) : (
+
                                         <ActionIcon
                                             type="submit"
                                             name="operation"
@@ -372,12 +428,14 @@ export default function TimerIndex() {
                                         >
                                             <IconPlayerPlay />
                                         </ActionIcon>
-                                    )
-                                )}
-                            </Box>
-                        </Box>
-                    </fetcher.Form>
-                </Card>
+
+                                    )}
+                                </Box>
+                            </Group>
+                        </Card>
+                    </MediaQuery>
+                </fetcher.Form>
+
             ) : (
                 <Card shadow="sm" p="md">
                     <Text>
