@@ -2,6 +2,7 @@ import { validateSignUp } from '~/validators/auth/sign-up';
 import { DeepMockProxy } from 'jest-mock-extended';
 import { db } from '~/services/db.server';
 import { PrismaClient } from '@prisma/client';
+import { yupLocale } from '~/locales/yup-locale';
 
 jest.mock('~/services/db.server');
 
@@ -38,7 +39,7 @@ describe('validateSignUp', () => {
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {
-                    email: 'Das ist ein Pflichtfeld',
+                    email: yupLocale.mixed?.required,
                 },
                 success: false
             });
@@ -55,7 +56,7 @@ describe('validateSignUp', () => {
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {
-                    email: 'Muss eine gültige E-Mail-Adresse sein',
+                    email: yupLocale.string?.email,
                 },
                 success: false
             });
