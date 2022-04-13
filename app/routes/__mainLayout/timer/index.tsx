@@ -3,12 +3,12 @@ import { useFetcher, useLoaderData } from '@remix-run/react';
 import { forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
-import { ActionIcon, Box, Card, Group, Select, Text } from '@mantine/core';
+import { ActionIcon, Box, Button, Card, Select, Text, useMantineTheme } from '@mantine/core';
 import { forwardRef, useEffect, useState } from 'react';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import { validateTimer } from '~/validators/time-tracks/timer';
 import { toDuration } from '~/utils/helpers';
-import { useInterval } from '@mantine/hooks';
+import { useInterval, useMediaQuery } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { TimeTrackRow } from '~/components/TimeTrackRow';
 import { Activity } from '@prisma/client';
@@ -216,6 +216,8 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export default function TimerIndex() {
+    const theme = useMantineTheme();
+    const smallerThanMd = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
     const fetcher = useFetcher();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
 
@@ -241,10 +243,16 @@ export default function TimerIndex() {
 
     return (
         <>
-            <Card shadow="sm" p="md">
-                {loaderData.defaultActivity ? (
+
+            {loaderData.defaultActivity ? (
+                <Card shadow="sm" p="md">
                     <fetcher.Form method="post">
-                        <Group>
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: smallerThanMd ? 'stretch' : 'center',
+                            flexDirection: smallerThanMd ? 'column' : 'row',
+                            gap: theme.spacing.md,
+                        }}>
                             <Box sx={{ flex: 1 }}>
                                 <Select
                                     searchable
@@ -298,48 +306,86 @@ export default function TimerIndex() {
                             </Box>
                             <Box>
                                 {loaderData.currentTimeTrack ? (
-                                    <ActionIcon
-                                        type="submit"
-                                        name="operation"
-                                        value="stop"
-                                        variant="light"
-                                        color="indigo"
-                                        size="lg"
-                                        radius="lg"
-                                        loading={
-                                            fetcher.state === 'submitting' ||
-                                            fetcher.state === 'loading'
-                                        }
-                                    >
-                                        <IconPlayerStop />
-                                    </ActionIcon>
+                                    smallerThanMd ? (
+                                        <Button
+                                            sx={{ width: '100%' }}
+                                            type="submit"
+                                            name="operation"
+                                            value="stop"
+                                            variant="light"
+                                            color="indigo"
+                                            leftIcon={<IconPlayerStop />}
+                                            loading={
+                                                fetcher.state === 'submitting' ||
+                                                fetcher.state === 'loading'
+                                            }
+                                        >
+                                            Stop
+                                        </Button>
+                                    ) : (
+                                        <ActionIcon
+                                            type="submit"
+                                            name="operation"
+                                            value="stop"
+                                            variant="light"
+                                            color="indigo"
+                                            size="lg"
+                                            radius="lg"
+                                            loading={
+                                                fetcher.state === 'submitting' ||
+                                                fetcher.state === 'loading'
+                                            }
+                                        >
+                                            <IconPlayerStop />
+                                        </ActionIcon>
+                                    )
                                 ) : (
-                                    <ActionIcon
-                                        type="submit"
-                                        name="operation"
-                                        value="start"
-                                        variant="light"
-                                        color="indigo"
-                                        size="lg"
-                                        radius="lg"
-                                        loading={
-                                            fetcher.state === 'submitting' ||
-                                            fetcher.state === 'loading'
-                                        }
-                                    >
-                                        <IconPlayerPlay />
-                                    </ActionIcon>
+                                    smallerThanMd ? (
+                                        <Button
+                                            sx={{ width: '100%' }}
+                                            type="submit"
+                                            name="operation"
+                                            value="start"
+                                            variant="light"
+                                            color="indigo"
+                                            leftIcon={<IconPlayerPlay />}
+                                            loading={
+                                                fetcher.state === 'submitting' ||
+                                                fetcher.state === 'loading'
+                                            }
+                                        >
+                                            Start
+                                        </Button>
+                                    ) : (
+                                        <ActionIcon
+                                            type="submit"
+                                            name="operation"
+                                            value="start"
+                                            variant="light"
+                                            color="indigo"
+                                            size="lg"
+                                            radius="lg"
+                                            loading={
+                                                fetcher.state === 'submitting' ||
+                                                fetcher.state === 'loading'
+                                            }
+                                        >
+                                            <IconPlayerPlay />
+                                        </ActionIcon>
+                                    )
                                 )}
                             </Box>
-                        </Group>
+                        </Box>
                     </fetcher.Form>
-                ) : (
+                </Card>
+            ) : (
+                <Card shadow="sm" p="md">
                     <Text>
                         Noch keine Taetigkeit vorhanden. Legen Sie bitte zuerst Klienten, Projekte und Taetigkeiten
                         an.
                     </Text>
-                )}
-            </Card>
+                </Card>
+            )}
             {loaderData.timeTracks.map((timeTrack) => {
                 return (
                     <TimeTrackRow

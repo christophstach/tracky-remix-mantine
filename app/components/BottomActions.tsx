@@ -13,7 +13,7 @@ export interface BottomActionsProps {
 
 export default function BottomActions(props: BottomActionsProps) {
     const theme = useMantineTheme();
-    const smallerThanSm = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
+    const smallerThanMd = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
 
     return (
         <Card
@@ -22,7 +22,7 @@ export default function BottomActions(props: BottomActionsProps) {
             mt="md"
             sx={(theme) => ({ display: 'flex', gap: theme.spacing.md })}>
             <Box sx={{ flex: 1 }}>
-                {!smallerThanSm ? (
+                {!smallerThanMd ? (
                     <Button
                         leftIcon={<IconArrowBigLeft />}
                         color="gray"
@@ -42,7 +42,7 @@ export default function BottomActions(props: BottomActionsProps) {
             </Box>
             {props.showDelete && (
                 <Box>
-                    {!smallerThanSm ? (
+                    {!smallerThanMd ? (
                         <Button
                             color="red"
                             type="button"
@@ -65,7 +65,7 @@ export default function BottomActions(props: BottomActionsProps) {
                 </Box>
             )}
             <Box>
-                {!smallerThanSm ? (
+                {!smallerThanMd ? (
                     <Button
                         type="submit"
                         leftIcon={<IconDeviceFloppy />}
