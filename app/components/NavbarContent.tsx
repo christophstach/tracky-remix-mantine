@@ -1,6 +1,6 @@
 import { Group } from '@mantine/core';
 import NavbarLink from '~/components/NavbarLink';
-import { IconApps, IconBox, IconBuildingFactory, IconListNumbers } from '@tabler/icons';
+import { IconApps, IconBox, IconBuildingFactory, IconClock, IconListNumbers } from '@tabler/icons';
 
 interface NavbarContentProps {
     onLinkClick?: () => void;
@@ -11,11 +11,20 @@ export default function NavbarContent(props: NavbarContentProps) {
 
     return (
         <Group direction="column" grow>
-            <NavbarLink
+            {false && <NavbarLink
                 icon={IconApps}
                 iconColor="indigo"
                 to="/"
                 label="Dashboard"
+                onClick={props.onLinkClick}
+                exact
+            />}
+
+            <NavbarLink
+                icon={IconClock}
+                iconColor="lime"
+                to="/timer"
+                label="Zeiterfassung"
                 onClick={props.onLinkClick}
                 exact
             />

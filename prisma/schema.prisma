@@ -60,8 +60,8 @@ model TimeTrack {
   id         String    @id @default(cuid())
   start      DateTime
   end        DateTime?
-  activity   Activity? @relation(fields: [activityId], references: [id], onDelete: SetNull)
-  activityId String?
+  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  activityId String
   invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
   invoiceId  String?
 }

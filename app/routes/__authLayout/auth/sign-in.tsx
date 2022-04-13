@@ -20,7 +20,7 @@ export async function action({ request }: DataFunctionArgs) {
     if (success) {
         try {
             await authenticator.authenticate('form', request, {
-                successRedirect: '/',
+                successRedirect: '/timer',
                 throwOnError: true,
                 context: formData, // optional
             });
@@ -40,7 +40,7 @@ export async function action({ request }: DataFunctionArgs) {
 
 export async function loader({ request, params }: DataFunctionArgs) {
     await authenticator.isAuthenticated(request, {
-        successRedirect: '/',
+        successRedirect: '/timer',
     });
 
     return null;

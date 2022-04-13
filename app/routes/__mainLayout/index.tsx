@@ -43,7 +43,11 @@ export async function action({ request, params }: DataFunctionArgs) {
 }
 
 export async function loader({ request }: DataFunctionArgs) {
-    const timeTracks = await db.timeTrack.findMany();
+    const timeTracks = await db.timeTrack.findMany({
+        where: {
+            end: null,
+        },
+    });
 
     const timeTrack = await db.timeTrack.findFirst({
         where: {

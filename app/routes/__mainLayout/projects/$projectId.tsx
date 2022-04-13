@@ -30,7 +30,6 @@ export async function action({ request, params }: DataFunctionArgs) {
     const user = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpsertProject(await request.formData());
 
-
     if (!id) {
         throw badRequest('Id not set');
     }

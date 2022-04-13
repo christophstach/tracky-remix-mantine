@@ -1,4 +1,5 @@
 import { BaseSchema, ValidationError } from 'yup';
+import dayjs from 'dayjs';
 
 export function delay(time: number): Promise<void> {
     return new Promise<void>(resolve => {
@@ -84,4 +85,13 @@ export function parseIdParam(param: string | undefined) {
 
         return undefined;
     }
+}
+
+export function toDuration(startDate: Date, endDate: Date, format = 'HH:mm:ss') {
+    const start = dayjs(startDate);
+    const end = dayjs(endDate);
+    const diff = end.diff(start);
+    const duration = dayjs.duration(diff);
+
+    return duration.format(format);
 }
