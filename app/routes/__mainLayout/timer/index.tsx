@@ -436,7 +436,7 @@ export default function TimerIndex() {
             ) : (
                 <Card shadow="sm" p="md">
                     <Text>
-                        Noch keine Taetigkeit vorhanden. Legen Sie bitte zuerst Klienten, Projekte und Taetigkeiten
+                        Noch keine Tätigkeiten vorhanden. Legen Sie bitte zuerst Klienten, Projekte und Tätigkeit
                         an.
                     </Text>
                 </Card>
