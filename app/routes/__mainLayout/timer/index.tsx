@@ -3,18 +3,18 @@ import { useFetcher, useLoaderData } from '@remix-run/react';
 import { forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
-import { ActionIcon, Box, Button, Card, Group, MediaQuery, Select, Stack, Text, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Box, Button, Card, Group, MediaQuery, Select, Stack, Text } from '@mantine/core';
 import { forwardRef, useEffect, useState } from 'react';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import { validateTimer } from '~/validators/time-tracks/timer';
 import { toDuration } from '~/utils/helpers';
-import { useInterval, useMediaQuery } from '@mantine/hooks';
+import { useInterval } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { TimeTrackRow } from '~/components/TimeTrackRow';
 import { Activity } from '@prisma/client';
 
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request }: DataFunctionArgs) {
     const user = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateTimer(await request.formData());
 
@@ -216,8 +216,6 @@ export async function loader({ request }: DataFunctionArgs) {
 }
 
 export default function TimerIndex() {
-    const theme = useMantineTheme();
-    const smallerThanMd = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
     const fetcher = useFetcher();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
 

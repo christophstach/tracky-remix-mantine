@@ -36,7 +36,7 @@ export async function action({ request }: DataFunctionArgs) {
     }
 }
 
-export async function loader({ request, params }: DataFunctionArgs) {
+export async function loader({ request }: DataFunctionArgs) {
     await authenticator.isAuthenticated(request, {
         successRedirect: '/',
     });
