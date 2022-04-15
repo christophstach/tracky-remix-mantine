@@ -37,7 +37,7 @@ export function TimEntryRow(props: TimeEntryRowProps) {
                 })}>
                     <updateFetcher.Form method="post">
                         <input type="hidden" name="id" value={timeEntry.id} />
-                        <TextInput name="text" defaultValue={timeEntry.text} />
+                        <TextInput name="text" placeholder="Beschreibung hinzufügen" defaultValue={timeEntry.text} />
                     </updateFetcher.Form>
                 </Box>
 
