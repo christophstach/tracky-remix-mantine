@@ -58,7 +58,6 @@ export function TimEntryRow(props: TimeEntryRowProps) {
                     </strong>
                 </Box>
                 <Box sx={(theme) => ({
-
                     [`@media (max-width: ${theme.breakpoints.xs}px)`]: {
                         flex: 1,
                         display: 'flex',
