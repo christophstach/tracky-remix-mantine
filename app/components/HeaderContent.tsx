@@ -19,7 +19,7 @@ export default function HeaderContent(props: HeaderContentProps) {
     const initials = `${props.user?.firstName?.substring(0, 1)}${props.user?.lastName?.substring(0, 1)}`;
 
     return (
-        <Group align="stretch" sx={{ width: '100%' }}>
+        <Group spacing="xs" align="stretch" sx={{ width: '100%' }}>
             <Box sx={{ flex: 1 }}></Box>
             <Box sx={{
                 display: 'flex',
@@ -31,23 +31,21 @@ export default function HeaderContent(props: HeaderContentProps) {
                 />
             </Box>
             <Box sx={(theme) => ({
-                paddingLeft: theme.spacing.md,
+                paddingLeft: theme.spacing.xs,
                 borderLeftWidth: '1px',
                 borderLeftStyle: 'dotted',
                 borderLeftColor: '#868e96',
                 display: 'flex',
                 alignItems: 'center',
-                paddingTop: '5px'
+                paddingTop: '5px',
+                fontSize: '0.8rem'
             })}>
                 <strong>
                     <Timer start={props.start} end={props.end} />
                 </strong>
             </Box>
             <Box sx={(theme) => ({
-                paddingLeft: theme.spacing.md,
-                borderLeftWidth: '1px',
-                borderLeftStyle: 'dotted',
-                borderLeftColor: '#868e96',
+
                 display: 'flex',
                 alignItems: 'center',
             })}>
@@ -74,10 +72,9 @@ export default function HeaderContent(props: HeaderContentProps) {
                         <IconPlayerPlay />
                     </ActionIcon>
                 )}
-
             </Box>
             <Box sx={(theme) => ({
-                paddingLeft: theme.spacing.md,
+                paddingLeft: theme.spacing.xs,
                 borderLeftWidth: '1px',
                 borderLeftStyle: 'dotted',
                 borderLeftColor: '#868e96',
