@@ -17,10 +17,12 @@ import { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
 import { ServerError } from '~/components/ServerError';
 import { ColorScheme, Divider } from '@mantine/core';
 import { MantineTheme } from '~/components/MantineTheme';
-import { NotificationsProvider } from '@mantine/notifications';
-import { DataFunctionArgs } from '@remix-run/node';
+import { NotificationsProvider, showNotification } from '@mantine/notifications';
+import { DataFunctionArgs, json } from '@remix-run/node';
 import { userPreferencesSessionStorage } from '~/services/user-preferences-session.server';
 import { yupLocale } from '~/locales/yup-locale';
+import { notificationSessionStorage } from '~/services/notification-session.server';
+import { useEffect } from 'react';
 
 dayjs.extend(duration);
 
@@ -78,20 +80,45 @@ export function CatchBoundary() {
     );
 }
 
+interface LoaderReturnType {
+    colorScheme: ColorScheme;
+    notification: {
+        type: 'success' | 'error';
+        title: string;
+        message: string;
+    }
+}
 
 export async function loader({ request }: DataFunctionArgs) {
-    const session = await userPreferencesSessionStorage.getSession(request.headers.get('Cookie'));
-    const colorScheme = await session.get('colorScheme');
+    const userPreferencesSession = await userPreferencesSessionStorage.getSession(request.headers.get('Cookie'));
+    const notificationSession = await notificationSessionStorage.getSession(request.headers.get('Cookie'));
+    const colorScheme = await userPreferencesSession.get('colorScheme');
+    const notification = notificationSession.get('notification');
 
-    return {
-        colorScheme
-    };
+    return json<LoaderReturnType>({
+        colorScheme,
+        notification
+    }, {
+        headers: {
+            'Set-Cookie': await notificationSessionStorage.commitSession(notificationSession),
+        },
+    });
 }
 
 
 export default function App() {
-    const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
+    const loaderData = useLoaderData<LoaderReturnType>();
     const fetcher = useFetcher();
+
+    useEffect(() => {
+        if (loaderData.notification) {
+            showNotification({
+                color: loaderData.notification.type === 'success' ? 'green' : 'red',
+                title: loaderData.notification.title,
+                message: loaderData.notification.message,
+            });
+        }
+    }, [ loaderData.notification ]);
 
     function handleChangeColorScheme(colorScheme: ColorScheme) {
         fetcher.submit({ colorScheme }, { method: 'post', action: '/settings/color-scheme' });

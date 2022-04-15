@@ -1,11 +1,12 @@
 import { Column, TableInstance, useRowState, useSortBy, useTable } from 'react-table';
-import { ActionIcon, Box, Group, Table } from '@mantine/core';
+import { ActionIcon, Box, Center, Group, Table, Text } from '@mantine/core';
 import { IconArrowDown, IconArrowUp } from '@tabler/icons';
 
 
 interface DataGridProps<T extends object> {
-    columns: Column<T>[],
-    data: T[]
+    columns: Column<T>[];
+    data: T[];
+    emptyText?: string;
 }
 
 export default function DataGrid<T extends object>(props: DataGridProps<T>) {
@@ -69,25 +70,35 @@ export default function DataGrid<T extends object>(props: DataGridProps<T>) {
                 </thead>
 
                 <tbody {...getTableBodyProps()}>
-                {rows.map(row => {
-                    prepareRow(row)
+                {rows.length > 0 ? (
+                    rows.map(row => {
+                        prepareRow(row)
 
-                    return (
-                        <tr {...row.getRowProps()} hidden={!!row.state.hidden}>
-                            {row.cells.map(cell => (
-                                <td {...cell.getCellProps({
-                                    style: {
-                                        width: cell.column.width,
-                                        minWidth: cell.column.minWidth,
-                                        maxWidth: cell.column.maxWidth,
-                                    }
-                                })}>
-                                    {cell.render('Cell')}
-                                </td>
-                            ))}
-                        </tr>
-                    )
-                })}
+                        return (
+                            <tr {...row.getRowProps()} hidden={!!row.state.hidden}>
+                                {row.cells.map(cell => (
+                                    <td {...cell.getCellProps({
+                                        style: {
+                                            width: cell.column.width,
+                                            minWidth: cell.column.minWidth,
+                                            maxWidth: cell.column.maxWidth,
+                                        }
+                                    })}>
+                                        {cell.render('Cell')}
+                                    </td>
+                                ))}
+                            </tr>
+                        )
+                    })
+                ) : (
+                    <tr>
+                        <td colSpan={headerGroups[headerGroups.length - 1].headers.length}>
+                            <Text color="dimmed" size="sm">
+                                <Center>{props.emptyText? props.emptyText : `Keine Daten vorhanden`}</Center>
+                            </Text>
+                        </td>
+                    </tr>
+                )}
                 </tbody>
             </Table>
         </Box>

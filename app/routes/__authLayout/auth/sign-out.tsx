@@ -28,7 +28,7 @@ export default function AuthSignOutRoute() {
 
     return (
         <Form method="post" ref={form}>
-            Sie wurden abgemeldet.
+            Sie wurden abgemeldet
         </Form>
     );
 }

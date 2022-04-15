@@ -1,8 +1,8 @@
+import { object, string } from 'yup';
 import { formDataToObject, validateWithSchema } from '~/utils/helpers';
-import { object, ref, string } from 'yup';
 import { db } from '~/services/db.server';
 
-export async function validateSignUp(formData: FormData) {
+export async function validateProfile(formData: FormData, userId: string) {
     const schema = object({
         email: string()
             .email()
@@ -12,7 +12,8 @@ export async function validateSignUp(formData: FormData) {
                 async (value) => {
                     const count = await db.user.count({
                         where: {
-                            email: value
+                            email: value,
+                            NOT: { id: userId },
                         }
                     });
 
@@ -20,9 +21,9 @@ export async function validateSignUp(formData: FormData) {
                 }
             )
             .required(),
-        password: string().required(),
-        passwordConfirmation: string().oneOf([ ref('password'), null ], 'Passwörter müssen übereinstimmen'),
-    });
+        firstName: string().default(''),
+        lastName: string().default(''),
+    })
 
     return validateWithSchema(
         formDataToObject(

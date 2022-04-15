@@ -6,6 +6,7 @@ import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { authenticator } from '~/services/auth.server';
 import { validateUpsertTask } from '~/validators/tasks/upsert-task';
+import { setNotification } from '~/services/notification-session.server';
 
 
 export const handle = {
@@ -23,7 +24,7 @@ export const handle = {
 
 export async function action({ request, params }: DataFunctionArgs) {
     const id = params.taskId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpsertTask(await request.formData());
 
 
@@ -31,7 +32,7 @@ export async function action({ request, params }: DataFunctionArgs) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -42,7 +43,7 @@ export async function action({ request, params }: DataFunctionArgs) {
                 project: {
                     client: {
                         user: {
-                            id: user.id
+                            id: userId
                         }
                     }
                 }
@@ -82,13 +83,31 @@ export async function action({ request, params }: DataFunctionArgs) {
         });
 
         if (id === 'new') {
-            return redirect(`/tasks/${task.id}`);
+            return redirect(`/tasks/${task.id}`, {
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Tätigkeit erstellt',
+                        'Die Tätigkeit wurde erfolgreich erstellt'
+                    )
+                }
+            });
         } else {
-            return redirectBack(request, { fallback: '/' });
+            return redirectBack(request, {
+                fallback: '/',
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Tätigkeit geändert',
+                        'Die Tätigkeit wurde erfolgreich geändert'
+                    )
+                }
+            });
         }
     } else {
         return {
-            success,
             fieldErrors
         };
     }
@@ -96,13 +115,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 
 export async function loader({ params, request }: DataFunctionArgs) {
     const id = params.taskId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('User not authenticated');
     }
 
@@ -113,7 +132,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
                 project: {
                     client: {
                         user: {
-                            id: user.id
+                            id: userId
                         }
                     }
                 }
@@ -137,14 +156,14 @@ export async function loader({ params, request }: DataFunctionArgs) {
             },
             where: {
                 client: {
-                    userId: user.id
+                    userId: userId
                 }
             }
         })
     };
 }
 
-export default function() {
+export default function () {
     const params = useParams();
     const fetcher = useFetcher();
     const transition = useTransition();
@@ -193,8 +212,8 @@ export default function() {
             </Card>
 
             <BottomActions
-                backLink="/activities"
-                showDelete={params.activityId !== 'new'}
+                backLink="/tasks"
+                showDelete={id !== 'new'}
                 loading={
                     transition.state === 'loading' ||
                     transition.state === 'submitting' ||

@@ -7,10 +7,11 @@ import { truncate } from '~/utils/helpers';
 import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
-import TopActions from '~/components/TopActions';
+import HeaderActions from '~/components/HeaderActions';
 import { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
+import TopActions from '~/components/TopActions';
 
 
 export const handle = {
@@ -43,16 +44,16 @@ export function CatchBoundary() {
 }
 
 export async function loader({ request }: DataFunctionArgs) {
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
     const projects = await db.project.findMany({
         where: {
             client: {
-                userId: user.id
+                userId
             }
         },
         orderBy: {
@@ -135,10 +136,12 @@ export default function() {
     ], []);
 
     return (
-        <Card shadow="sm" p="md">
-            <DataGrid columns={columns} data={data} />
-
+        <>
             <TopActions addLink="/projects/new" />
-        </Card>
+
+            <Card shadow="sm" p="md">
+                <DataGrid columns={columns} data={data} emptyText="Noch keine Projekte angelegt" />
+            </Card>
+        </>
     );
 }

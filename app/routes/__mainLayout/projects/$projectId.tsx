@@ -6,6 +6,7 @@ import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { authenticator } from '~/services/auth.server';
 import { validateUpsertProject } from '~/validators/projects/upsert-project';
+import { setNotification } from '~/services/notification-session.server';
 
 
 export const handle = {
@@ -23,14 +24,14 @@ export const handle = {
 
 export async function action({ request, params }: DataFunctionArgs) {
     const id = params.projectId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpsertProject(await request.formData());
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -40,7 +41,7 @@ export async function action({ request, params }: DataFunctionArgs) {
                 id,
                 client: {
                     user: {
-                        id: user.id
+                        id: userId
                     },
                 }
             }
@@ -79,13 +80,31 @@ export async function action({ request, params }: DataFunctionArgs) {
         });
 
         if (id === 'new') {
-            return redirect(`/projects/${project.id}`);
+            return redirect(`/projects/${project.id}`, {
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Projekt erstellt',
+                        'Das Projekt wurde erfolgreich erstellt'
+                    )
+                }
+            });
         } else {
-            return redirectBack(request, { fallback: '/' });
+            return redirectBack(request, {
+                fallback: '/',
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Projekt geändert',
+                        'Das Projekt wurde erfolgreich geändert'
+                    )
+                }
+            });
         }
     } else {
         return {
-            success,
             fieldErrors
         };
     }
@@ -93,13 +112,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 
 export async function loader({ params, request }: DataFunctionArgs) {
     const id = params.projectId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -109,7 +128,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
                 id,
                 client: {
                     user: {
-                        id: user.id
+                        id: userId
                     },
                 }
             }
@@ -131,13 +150,13 @@ export async function loader({ params, request }: DataFunctionArgs) {
                 name: 'asc'
             },
             where: {
-                userId: user.id
+                userId: userId
             }
         })
     };
 }
 
-export default function() {
+export default function () {
     const params = useParams();
     const fetcher = useFetcher();
     const transition = useTransition();
@@ -187,7 +206,7 @@ export default function() {
 
             <BottomActions
                 backLink="/projects"
-                showDelete={params.projectId !== 'new'}
+                showDelete={id !== 'new'}
                 loading={
                     transition.state === 'loading' ||
                     transition.state === 'submitting' ||

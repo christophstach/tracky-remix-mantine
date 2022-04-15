@@ -6,6 +6,7 @@ import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { validateUpsertClient } from '~/validators/clients/upsert-client';
 import { authenticator } from '~/services/auth.server';
+import { setNotification } from '~/services/notification-session.server';
 
 
 export const handle = {
@@ -23,14 +24,14 @@ export const handle = {
 
 export async function action({ request, params }: DataFunctionArgs) {
     const id = params.clientId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpsertClient(await request.formData());
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -39,7 +40,7 @@ export async function action({ request, params }: DataFunctionArgs) {
             where: {
                 id,
                 user: {
-                    id: user.id
+                    id: userId
                 }
             }
         });
@@ -69,7 +70,7 @@ export async function action({ request, params }: DataFunctionArgs) {
                 description: data.description,
                 user: {
                     connect: {
-                        id: user.id
+                        id: userId
                     }
                 }
             },
@@ -80,13 +81,31 @@ export async function action({ request, params }: DataFunctionArgs) {
         });
 
         if (id === 'new') {
-            return redirect(`/clients/${client.id}`);
+            return redirect(`/clients/${client.id}`, {
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Klient erstellt',
+                        'Der Klient wurde erfolgreich erstellt'
+                    )
+                }
+            });
         } else {
-            return redirectBack(request, { fallback: '/' });
+            return redirectBack(request, {
+                fallback: '/',
+                headers: {
+                    'Set-Cookie': await setNotification(
+                        request.headers.get('Cookie'),
+                        'success',
+                        'Klient geändert',
+                        'Der Klient wurde erfolgreich geändert'
+                    )
+                }
+            });
         }
     } else {
         return {
-            success,
             fieldErrors
         };
     }
@@ -94,13 +113,13 @@ export async function action({ request, params }: DataFunctionArgs) {
 
 export async function loader({ params, request }: DataFunctionArgs) {
     const id = params.clientId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -109,7 +128,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
             where: {
                 id,
                 user: {
-                    id: user.id
+                    id: userId
                 }
             }
         });
@@ -128,7 +147,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
     };
 }
 
-export default function() {
+export default function () {
     const params = useParams();
     const fetcher = useFetcher();
     const transition = useTransition();
@@ -164,7 +183,7 @@ export default function() {
 
             <BottomActions
                 backLink="/clients"
-                showDelete={params.clientId !== 'new'}
+                showDelete={id !== 'new'}
                 loading={
                     transition.state === 'loading' ||
                     transition.state === 'submitting' ||

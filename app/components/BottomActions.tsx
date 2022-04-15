@@ -1,19 +1,17 @@
-import { ActionIcon, Box, Button, Card, useMantineTheme } from '@mantine/core';
+import { ActionIcon, Box, Button, Card, MediaQuery } from '@mantine/core';
 import { IconArrowBigLeft, IconDeviceFloppy, IconTrash } from '@tabler/icons';
 import { Link } from '@remix-run/react';
 import React from 'react';
-import { useMediaQuery } from '@mantine/hooks';
 
 export interface BottomActionsProps {
     backLink: string;
-    showDelete: boolean;
     loading: boolean;
-    onDelete: () => void;
+    showDelete?: boolean;
+    onDelete?: () => void;
 }
 
 export default function BottomActions(props: BottomActionsProps) {
-    const theme = useMantineTheme();
-    const smallerThanMd = useMediaQuery(`(max-width: ${theme.breakpoints.sm}px)`);
+    const buttonVariant = 'light';
 
     return (
         <Card
@@ -22,66 +20,75 @@ export default function BottomActions(props: BottomActionsProps) {
             mt="md"
             sx={(theme) => ({ display: 'flex', gap: theme.spacing.md })}>
             <Box sx={{ flex: 1 }}>
-                {!smallerThanMd ? (
+                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                     <Button
                         leftIcon={<IconArrowBigLeft />}
                         color="gray"
+                        variant={buttonVariant}
                         component={Link}
                         to={props.backLink}>Zurück</Button>
-                ) : (
+                </MediaQuery>
+
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                     <ActionIcon
                         color="gray"
                         size="lg"
-                        variant="filled"
+                        variant={buttonVariant}
                         component={Link}
                         to={props.backLink}>
                         <IconArrowBigLeft />
                     </ActionIcon>
-                )}
+                </MediaQuery>
 
             </Box>
             {props.showDelete && (
                 <Box>
-                    {!smallerThanMd ? (
+                    <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                         <Button
                             color="red"
                             type="button"
+                            variant={buttonVariant}
                             leftIcon={<IconTrash />}
                             onClick={props.onDelete}
                             loading={props.loading}
                         >Löschen</Button>
-                    ) : (
+                    </MediaQuery>
+
+                    <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                         <ActionIcon
                             color="red"
                             type="button"
-                            variant="filled"
+                            variant={buttonVariant}
                             size="lg"
                             onClick={props.onDelete}
                             loading={props.loading}
                         >
                             <IconTrash />
                         </ActionIcon>
-                    )}
+                    </MediaQuery>
                 </Box>
             )}
             <Box>
-                {!smallerThanMd ? (
+                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                     <Button
                         type="submit"
+                        variant={buttonVariant}
                         leftIcon={<IconDeviceFloppy />}
                         loading={props.loading}
                     >Speichern</Button>
-                ) : (
+                </MediaQuery>
+
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                     <ActionIcon
                         color="blue"
                         type="submit"
-                        variant="filled"
                         size="lg"
+                        variant={buttonVariant}
                         loading={props.loading}
                     >
                         <IconDeviceFloppy />
                     </ActionIcon>
-                )}
+                </MediaQuery>
             </Box>
         </Card>
     );

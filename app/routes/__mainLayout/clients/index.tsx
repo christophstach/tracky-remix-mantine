@@ -7,10 +7,10 @@ import { truncate } from '~/utils/helpers';
 import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
-import TopActions from '~/components/TopActions';
 import { authenticator } from '~/services/auth.server';
 import { DataFunctionArgs } from '@remix-run/node';
 import { forbidden } from 'remix-utils';
+import TopActions from '~/components/TopActions';
 
 
 export const handle = {
@@ -43,15 +43,15 @@ export function CatchBoundary() {
 }
 
 export async function loader({ request }: DataFunctionArgs) {
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
     const clients = await db.client.findMany({
         where: {
-            userId: user.id
+            userId
         },
         orderBy: {
             name: 'asc'
@@ -64,7 +64,7 @@ export async function loader({ request }: DataFunctionArgs) {
     return { clients };
 }
 
-export default function() {
+export default function () {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const data = useMemo<typeof loaderData.clients>(() => loaderData.clients, [ loaderData.clients ]);
 
@@ -124,10 +124,12 @@ export default function() {
     ], []);
 
     return (
-        <Card shadow="sm" p="md">
-            <DataGrid columns={columns} data={data} />
-
+        <>
             <TopActions addLink="/clients/new" />
-        </Card>
+
+            <Card shadow="sm" p="md">
+                <DataGrid columns={columns} data={data} emptyText="Noch keine Klienten angelegt" />
+            </Card>
+        </>
     );
 }

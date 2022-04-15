@@ -4,11 +4,11 @@ import {
     Breadcrumbs,
     Burger,
     Card,
-    createStyles,
     Header,
     MediaQuery,
     Navbar,
-    ScrollArea
+    ScrollArea,
+    useMantineTheme
 } from '@mantine/core';
 import type { DataFunctionArgs } from '@remix-run/node';
 import { MetaFunction } from '@remix-run/node';
@@ -18,37 +18,7 @@ import { useState } from 'react';
 import HeaderContent from '~/components/HeaderContent';
 import { IconArrowRight } from '@tabler/icons';
 import NavbarContent from '~/components/NavbarContent';
-
-const useStyles = createStyles((theme, _params, getRef) => {
-    return {
-        pageWrapper: {
-            position: 'relative',
-            height: '100%',
-
-            '&::before': {
-                content: '\'\'',
-                display: 'block',
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                width: '100%',
-                height: '100%',
-                opacity: '0.4',
-                backgroundImage: 'url(\'/kevin-andre-ePBkyKJP77A-unsplash.jpg\')',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: '0px -300px',
-                backgroundAttachment: 'fixed',
-                backgroundSize: 'cover',
-            }
-        },
-
-        page: {
-            position: 'relative',
-            overflow: 'auto',
-            minHeight: '100%'
-        }
-    }
-});
+import { db } from '~/services/db.server';
 
 export const meta: MetaFunction = () => {
     return { title: 'Tracky' };
@@ -63,8 +33,14 @@ export const handle = {
 }
 
 export async function loader({ request }: DataFunctionArgs) {
-    const user = await authenticator.isAuthenticated(request, {
+    const userId = await authenticator.isAuthenticated(request, {
         failureRedirect: '/auth/sign-in',
+    });
+
+    const user = await db.user.findUnique({
+        where: {
+            id: userId,
+        },
     });
 
     return { user };
@@ -72,8 +48,7 @@ export async function loader({ request }: DataFunctionArgs) {
 
 export default function MainLayout() {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
-
-    const { classes, theme } = useStyles();
+    const theme = useMantineTheme();
     const [ opened, setOpened ] = useState(false);
 
     const matches = useMatches();
@@ -90,9 +65,9 @@ export default function MainLayout() {
         <AppShell
             navbarOffsetBreakpoint="sm"
             fixed
-            styles={(theme) => ({
+            styles={{
                 main: { backgroundColor: theme.colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[0] },
-            })}
+            }}
             navbar={
                 <Navbar
                     p="md"
@@ -124,7 +99,7 @@ export default function MainLayout() {
                                 mr="xl"
                             />
                         </MediaQuery>
-                        <HeaderContent />
+                        <HeaderContent user={loaderData.user} />
                     </div>
                 </Header>
             }

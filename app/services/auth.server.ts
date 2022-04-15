@@ -7,7 +7,7 @@ import { exclude } from '~/utils/exclude';
 import { authSessionStorage } from '~/services/auth-session.server';
 
 
-export const authenticator = new Authenticator<Omit<User, 'passwordHash'>>(authSessionStorage);
+export const authenticator = new Authenticator<string>(authSessionStorage);
 
 authenticator.use(
     new FormStrategy(async ({ context }) => {
@@ -24,7 +24,7 @@ authenticator.use(
 
             if (user) {
                 if (await bcrypt.compare(password, user.passwordHash)) {
-                    return exclude(user, 'passwordHash');
+                    return user.id;
                 }
             }
         }

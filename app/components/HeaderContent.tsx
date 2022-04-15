@@ -1,24 +1,29 @@
 import {
+    Avatar,
     Box,
-    Button,
     Center,
+    Divider,
     Group,
     MediaQuery,
+    Menu,
     SegmentedControl,
-    useMantineColorScheme,
-    useMantineTheme
+    useMantineColorScheme
 } from '@mantine/core';
 import { IconMoon, IconSun } from '@tabler/icons';
+import { User } from '@prisma/client';
 import { Link } from '@remix-run/react';
 
-export default function HeaderContent() {
-    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+interface HeaderContentProps {
+    user: Partial<User> | null;
+}
 
-    // SegmentedControl verursacht error beim SSR. Weiter beobachten, ob sich das mit einem zukuenftigen Update von
-    // Mantine ändert.
+export default function HeaderContent(props: HeaderContentProps) {
+    const { colorScheme, toggleColorScheme } = useMantineColorScheme();
+    const initials = `${props.user?.firstName?.substring(0, 1)}${props.user?.lastName?.substring(0, 1)}`;
+
     return (
         <Group sx={{ width: '100%' }}>
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, textAlign: 'right' }}>
                 <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                     <SegmentedControl
                         value={colorScheme}
@@ -73,11 +78,33 @@ export default function HeaderContent() {
 
 
             </Box>
-            <Box id="header-portal" sx={(theme) => ({ display: 'flex', gap: theme.spacing.xl, alignItems: 'center' })}>
+            <Box sx={(theme) => ({
 
-            </Box>
-            <Box>
-                <Button component={Link} to="/auth/sign-out">Abmelden</Button>
+                paddingLeft: theme.spacing.md,
+                borderLeftWidth: '1px',
+                borderLeftStyle: 'dotted',
+                borderLeftColor: '#868e96',
+            })}>
+                {<Menu
+                    sx={{ display: 'block' }}
+                    control={initials.trim() ? (
+                        <Avatar sx={{cursor: 'pointer'}} size="md" color="blue" radius="xl">
+                            {initials.toUpperCase()}
+                        </Avatar>
+                    ) : (
+                        <Avatar sx={{cursor: 'pointer'}} size="md" color="blue" radius="xl" />
+                    )}
+                >
+                    <Menu.Item component={Link} to="/profile">
+                        Profil
+                    </Menu.Item>
+
+                    <Divider />
+
+                    <Menu.Item component={Link} to="/auth/sign-out">
+                        Abmelden
+                    </Menu.Item>
+                </Menu>}
             </Box>
         </Group>
     );

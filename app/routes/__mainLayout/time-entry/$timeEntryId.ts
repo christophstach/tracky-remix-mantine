@@ -6,13 +6,13 @@ import { authenticator } from '~/services/auth.server';
 
 export async function action({ request, params }: DataFunctionArgs) {
     const id = params.timeEntryId;
-    const user = await authenticator.isAuthenticated(request);
+    const userId = await authenticator.isAuthenticated(request);
 
     if (!id) {
         throw badRequest('Id not set');
     }
 
-    if (!user) {
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
@@ -24,7 +24,7 @@ export async function action({ request, params }: DataFunctionArgs) {
                     project: {
                         client: {
                             user: {
-                                id: user.id
+                                id: userId
                             }
                         }
                     }

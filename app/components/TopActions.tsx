@@ -1,37 +1,44 @@
-import { ActionIcon, Button, useMantineTheme } from '@mantine/core';
-import { IconDeviceFloppy, IconPlus } from '@tabler/icons';
-import { Link } from '@remix-run/react';
+import { ActionIcon, Box, Button, Card, MediaQuery } from '@mantine/core';
+import { IconPlus } from '@tabler/icons';
 import React from 'react';
-import { useMediaQuery } from '@mantine/hooks';
-import { HeaderPortal } from '~/components/HeaderPortal';
+import { Link } from '@remix-run/react';
 
 export interface TopActionsProps {
     addLink: string;
 }
 
 export default function TopActions(props: TopActionsProps) {
-    const theme = useMantineTheme();
-    const largerThanSm = useMediaQuery(`(min-width: ${theme.breakpoints.sm}px)`);
+    const buttonVariant = 'light';
 
     return (
-        <HeaderPortal>
-            {largerThanSm ? (
-                <Button
-                    component={Link}
-                    to={props.addLink}
-                    leftIcon={<IconPlus />}
-                >Neu</Button>
-            ) : (
-                <ActionIcon
-                    component={Link}
-                    to={props.addLink}
-                    color="blue"
-                    variant="filled"
-                    size="lg"
-                >
-                    <IconPlus />
-                </ActionIcon>
-            )}
-        </HeaderPortal>
+        <Card
+            shadow="sm"
+            p="md"
+            my="md"
+            sx={(theme) => ({ display: 'flex', gap: theme.spacing.md })}>
+            <Box sx={{ flex: 1, textAlign: 'right' }}>
+                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                    <Button
+                        leftIcon={<IconPlus />}
+                        color="indigo"
+                        variant={buttonVariant}
+                        component={Link}
+                        to={props.addLink}
+                    >Neu</Button>
+                </MediaQuery>
+
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                    <ActionIcon
+                        color="indigo"
+                        size="lg"
+                        variant={buttonVariant}
+                        component={Link}
+                        to={props.addLink}
+                    >
+                        <IconPlus />
+                    </ActionIcon>
+                </MediaQuery>
+            </Box>
+        </Card>
     );
 }

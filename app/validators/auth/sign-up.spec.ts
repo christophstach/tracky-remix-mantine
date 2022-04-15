@@ -73,7 +73,7 @@ describe('validateSignUp', () => {
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {
-                    email: 'Diese E-Mail-Adresse wurde bereits registriert',
+                    email: 'Diese E-Mail-Adresse ist bereits vergeben',
                 },
                 success: false
             });
