@@ -22,20 +22,25 @@ export function TimEntryRow(props: TimeEntryRowProps) {
         <Card shadow="sm" p="xs" mt="xs">
             <Box sx={(theme) => ({
                 display: 'flex',
+                flexWrap: 'wrap',
                 alignItems: 'center',
-                gap: theme.spacing.md
+                gap: theme.spacing.xs,
+                [`@media (min-width: ${theme.breakpoints.xs}px)`]: {
+                    gap: theme.spacing.md,
+                },
             })}>
-                <Box sx={{ flex: 1 }}>
+                <Box sx={(theme) => ({
+                    flex: 1,
+                    [`@media (max-width: ${theme.breakpoints.xs}px)`]: {
+                        minWidth: '100%'
+                    },
+                })}>
                     <updateFetcher.Form method="post">
                         <input type="hidden" name="id" value={timeEntry.id} />
                         <TextInput name="text" size="xs" defaultValue={timeEntry.text} />
                     </updateFetcher.Form>
                 </Box>
-                <Box>
-                    {client && `${client.name}: `}
-                    {project && `${project.name} - `}
-                    {task && task.name}
-                </Box>
+
                 <Box sx={{ width: '154px' }}>
                     {timeEntry.end ? (
                         `${dayjs(timeEntry.start).format('HH:mm:ss')} bis ${dayjs(timeEntry.end).format('HH:mm:ss')}`
@@ -52,8 +57,17 @@ export function TimEntryRow(props: TimeEntryRowProps) {
                         )}
                     </strong>
                 </Box>
-                <Box>
-                    <deleteFetcher.Form method="delete" action={`/time-entries/${timeEntry.id}`}>
+                <Box sx={(theme) => ({
+
+                    [`@media (max-width: ${theme.breakpoints.xs}px)`]: {
+                        flex: 1,
+                        display: 'flex',
+                        justifyContent: 'end'
+                    },
+                })}>
+                    <deleteFetcher.Form
+                        method="delete"
+                        action={`/time-entries/${timeEntry.id}`}>
                         <ActionIcon
                             type="submit"
                             variant="light"

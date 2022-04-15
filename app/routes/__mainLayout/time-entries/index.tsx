@@ -15,7 +15,7 @@ export const handle = {
     }
 }
 
-export async function action({ request, params }: DataFunctionArgs) {
+export async function action({ request }: DataFunctionArgs) {
     const userId = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpdateTimeEntry(await request.formData());
     const id = data?.id;
