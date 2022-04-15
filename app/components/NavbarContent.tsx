@@ -7,8 +7,6 @@ interface NavbarContentProps {
 }
 
 export default function NavbarContent(props: NavbarContentProps) {
-
-
     return (
         <Group direction="column" grow>
             {false && <NavbarLink
@@ -24,7 +22,7 @@ export default function NavbarContent(props: NavbarContentProps) {
                 icon={IconClock}
                 iconColor="lime"
                 to="/time-entries"
-                label="Zeiterfassung"
+                label="Zeiterfassungen"
                 onClick={props.onLinkClick}
                 exact
             />

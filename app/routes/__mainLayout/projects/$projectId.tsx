@@ -87,8 +87,6 @@ export async function action({ request, params }: DataFunctionArgs) {
             }
         });
 
-        console.log(project);
-
         if (id === 'new') {
             return redirect(`/projects/${project.id}`, {
                 headers: {

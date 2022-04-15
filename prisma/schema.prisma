@@ -57,6 +57,7 @@ model Task {
 
 model TimeEntry {
   id        String    @id @default(cuid())
+  text      String    @default("")
   start     DateTime
   end       DateTime?
   user      User      @relation(fields: [userId], references: [id])
