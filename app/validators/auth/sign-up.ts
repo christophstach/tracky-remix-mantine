@@ -5,7 +5,6 @@ import { db } from '~/services/db.server';
 export async function validateSignUp(formData: FormData) {
     const schema = object({
         email: string()
-            .required()
             .email()
             .test(
                 'email-exists',
@@ -19,7 +18,8 @@ export async function validateSignUp(formData: FormData) {
 
                     return count === 0;
                 }
-            ),
+            )
+            .required(),
         password: string().required(),
         passwordConfirmation: string().oneOf([ ref('password'), null ], 'Passwörter müssen übereinstimmen'),
     });

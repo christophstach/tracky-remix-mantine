@@ -3,33 +3,35 @@ import { ActionIcon, Box, Button, Card, Group, MediaQuery, Stack } from '@mantin
 import dayjs from 'dayjs';
 import { toDuration } from '~/utils/helpers';
 import { IconTrash } from '@tabler/icons';
-import { Activity, Client, Project, TimeTrack } from '@prisma/client'
+import { Task, Client, Project, TimeEntry } from '@prisma/client'
 
 interface TimeTrackRowProps {
-    timeTrack: TimeTrack;
-    activity: Activity;
-    project: Project;
-    client: Client;
+    timeEntry: TimeEntry;
+    task?: Task;
+    project: Project | null | undefined;
+    client: Client | null | undefined;
 }
 
 export function TimeTrackRow(props: TimeTrackRowProps) {
     const fetcher = useFetcher();
-    const { timeTrack, activity, project, client } = props;
+    const { timeEntry, task, project, client } = props;
 
     return (
-        <fetcher.Form method="delete" action={`/time-tracks/${timeTrack.id}`}>
+        <fetcher.Form method="delete" action={`/time-tracks/${timeEntry.id}`}>
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Card shadow="sm" p="md" mt="md">
                     <Stack align="stretch">
                         <Box>
-                            {client.name}: {project.name} - {activity.name}
+                            {client && `${client.name}: `}
+                            {project && `${project.name} - `}
+                            {task && task.name}
                         </Box>
                         <Box>
-                            {dayjs(timeTrack.start).format('HH:mm:ss')} bis {dayjs(timeTrack.end).format('HH:mm:ss')}
+                            {dayjs(timeEntry.start).format('HH:mm:ss')} bis {dayjs(timeEntry.end).format('HH:mm:ss')}
                         </Box>
                         <Box>
                             <strong>
-                                {timeTrack.end && toDuration(timeTrack.start, timeTrack.end)}
+                                {timeEntry.end && toDuration(timeEntry.start, timeEntry.end)}
                             </strong>
                         </Box>
                         <Box>
@@ -55,14 +57,16 @@ export function TimeTrackRow(props: TimeTrackRowProps) {
                 <Card shadow="sm" p="md" mt="md">
                     <Group>
                         <Box sx={{ flex: 1 }}>
-                            {client.name}: {project.name} - {activity.name}
+                            {client && `${client.name}: `}
+                            {project && `${project.name} - `}
+                            {task && task.name}
                         </Box>
                         <Box sx={{ width: '155px' }}>
-                            {dayjs(timeTrack.start).format('HH:mm:ss')} bis {dayjs(timeTrack.end).format('HH:mm:ss')}
+                            {dayjs(timeEntry.start).format('HH:mm:ss')} bis {dayjs(timeEntry.end).format('HH:mm:ss')}
                         </Box>
                         <Box>
                             <strong>
-                                {timeTrack.end && toDuration(timeTrack.start, timeTrack.end)}
+                                {timeEntry.end && toDuration(timeEntry.start, timeEntry.end)}
                             </strong>
                         </Box>
                         <Box>

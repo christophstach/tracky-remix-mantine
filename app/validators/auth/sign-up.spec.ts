@@ -15,14 +15,14 @@ describe('validateSignUp', () => {
         dbMock.user.count.mockResolvedValue(0);
 
         formData.append('email', 'abc@dfg.de');
-        formData.append('password', 'Password');
-        formData.append('passwordConfirmation', 'Password');
+        formData.append('password', 'password');
+        formData.append('passwordConfirmation', 'password');
 
         expect(await validateSignUp(formData)).toStrictEqual({
             data: {
                 email: 'abc@dfg.de',
-                password: 'Password',
-                passwordConfirmation: 'Password',
+                password: 'password',
+                passwordConfirmation: 'password',
             },
             success: true
         });
@@ -34,8 +34,8 @@ describe('validateSignUp', () => {
 
             dbMock.user.count.mockResolvedValue(0);
 
-            formData.append('password', 'Password');
-            formData.append('passwordConfirmation', 'Password');
+            formData.append('password', 'password');
+            formData.append('passwordConfirmation', 'password');
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {
@@ -51,8 +51,8 @@ describe('validateSignUp', () => {
             dbMock.user.count.mockResolvedValue(0);
 
             formData.append('email', 'ada.de');
-            formData.append('password', 'Password');
-            formData.append('passwordConfirmation', 'Password');
+            formData.append('password', 'password');
+            formData.append('passwordConfirmation', 'password');
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {
@@ -68,8 +68,8 @@ describe('validateSignUp', () => {
             dbMock.user.count.mockResolvedValue(1);
 
             formData.append('email', 'abc@dfg.de');
-            formData.append('password', 'Password');
-            formData.append('passwordConfirmation', 'Password');
+            formData.append('password', 'password');
+            formData.append('passwordConfirmation', 'password');
 
             expect(await validateSignUp(formData)).toStrictEqual({
                 fieldErrors: {

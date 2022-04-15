@@ -11,62 +11,53 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  firstName     String   @default("")
-  lastName      String   @default("")
-  clients       Client[] @relation(name: "ClientsToUser")
-  defaultClient Client?  @relation(name: "DefaultClient")
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  firstName    String   @default("")
+  lastName     String   @default("")
+  clients      Client[]
 }
 
 model Client {
-  id                  String    @id @default(cuid())
-  name                String
-  description         String
-  projects            Project[] @relation(name: "ProjectsToClient")
-  defaultProject      Project?  @relation(name: "DefaultProject")
-  user                User      @relation(name: "ClientsToUser", fields: [userId], references: [id])
-  userId              String
-  defaultClientUser   User?     @relation(name: "DefaultClient", fields: [defaultClientUserId], references: [id])
-  defaultClientUserId String?   @unique
+  id          String    @id @default(cuid())
+  name        String
+  description String
+  projects    Project[]
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
 }
 
 model Project {
-  id                     String     @id @default(cuid())
-  name                   String
-  description            String
-  client                 Client     @relation(name: "ProjectsToClient", fields: [clientId], references: [id], onDelete: Cascade)
-  clientId               String
-  defaultProjectClient   Client?    @relation(name: "DefaultProject", fields: [defaultProjectClientId], references: [id])
-  defaultProjectClientId String?    @unique
-  activities             Activity[] @relation(name: "ActivitiesToProject")
-  defaultActivity        Activity?  @relation(name: "DefaultActivity")
+  id          String  @id @default(cuid())
+  name        String
+  description String
+  client      Client? @relation(fields: [clientId], references: [id])
+  clientId    String?
+  tasks       Task[]
+  hourlyRate  Float   @default(0)
 }
 
-model Activity {
-  id                       String      @id @default(cuid())
-  name                     String
-  description              String
-  project                  Project     @relation(name: "ActivitiesToProject", fields: [projectId], references: [id], onDelete: Cascade)
-  projectId                String
-  defaultActivityProject   Project?    @relation(name: "DefaultActivity", fields: [defaultActivityProjectId], references: [id])
-  defaultActivityProjectId String?     @unique
-  timeTracks               TimeTrack[]
-  hourlyRate               Int         @default(0)
+model Task {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  project     Project? @relation(fields: [projectId], references: [id])
+  projectId   String?
+  timeEntries TimeEntry[]
 }
 
-model TimeTrack {
-  id         String    @id @default(cuid())
-  start      DateTime
-  end        DateTime?
-  activity   Activity  @relation(fields: [activityId], references: [id], onDelete: Cascade)
-  activityId String
-  invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
-  invoiceId  String?
+model TimeEntry {
+  id        String    @id @default(cuid())
+  start     DateTime
+  end       DateTime?
+  task      Task      @relation(fields: [taskId], references: [id])
+  taskId    String
+  invoice   Invoice?  @relation(fields: [invoiceId], references: [id])
+  invoiceId String?
 }
 
 model Invoice {
-  id         String      @id @default(cuid())
-  timeTracks TimeTrack[]
+  id          String      @id @default(cuid())
+  timeEntries TimeEntry[]
 }

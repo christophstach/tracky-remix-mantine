@@ -48,11 +48,10 @@ export default function NavbarContent(props: NavbarContentProps) {
             <NavbarLink
                 icon={IconListNumbers}
                 iconColor="grape"
-                to="/activities"
+                to="/tasks"
                 label="Tätigkeiten"
                 onClick={props.onLinkClick}
             />
-
         </Group>
     );
 }

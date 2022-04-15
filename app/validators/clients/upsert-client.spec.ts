@@ -5,13 +5,13 @@ describe('validateUpsertClient', () => {
     test('Success', async () => {
         const formData = new FormData()
 
-        formData.append('name', 'Name');
-        formData.append('description', 'Description');
+        formData.append('name', 'name');
+        formData.append('description', 'description');
 
         expect(await validateUpsertClient(formData)).toStrictEqual({
             data: {
-                name: 'Name',
-                description: 'Description',
+                name: 'name',
+                description: 'description',
             },
             success: true
         });
@@ -21,7 +21,7 @@ describe('validateUpsertClient', () => {
         test('Name required', async () => {
             const formData = new FormData();
 
-            formData.append('description', 'Description');
+            formData.append('description', 'description');
 
             expect(await validateUpsertClient(formData)).toStrictEqual({
                 fieldErrors: {

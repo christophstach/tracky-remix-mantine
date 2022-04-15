@@ -67,7 +67,7 @@ export async function loader({ request }: DataFunctionArgs) {
     return { projects };
 }
 
-export default function ProjectsIndex() {
+export default function() {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const data = useMemo<typeof loaderData.projects>(() => loaderData.projects, [ loaderData.projects ]);
 
@@ -93,7 +93,7 @@ export default function ProjectsIndex() {
             accessor: 'client',
             width: '33%',
             Cell: (instance) => {
-                return instance.value.name;
+                return instance.value?.name;
             }
         },
         {
@@ -101,7 +101,7 @@ export default function ProjectsIndex() {
             accessor: '_count',
             disableSortBy: true,
             Cell: (instance) => {
-                return instance.value.activities;
+                return instance.value?.tasks;
             }
         },
         {

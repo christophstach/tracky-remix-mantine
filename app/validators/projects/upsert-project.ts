@@ -5,7 +5,7 @@ export async function validateUpsertProject(formData: FormData) {
     const schema = object({
         name: string().required(),
         description: string().default(''),
-        clientId: string().required(),
+        clientId: string().nullable().required(),
     });
 
     return validateWithSchema(

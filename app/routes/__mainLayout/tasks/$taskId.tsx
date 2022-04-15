@@ -5,26 +5,26 @@ import { DataFunctionArgs, redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { authenticator } from '~/services/auth.server';
-import { validateUpsertActivity } from '~/validators/activities/upsert-activity';
+import { validateUpsertTask } from '~/validators/tasks/upsert-task';
 
 
 export const handle = {
     breadcrumbs(data: InferDataFunction<typeof loader>) {
-        const last = data.activity ?
-            { to: `/activities/${data.activity.id}`, label: `${data.activity.name}` } :
-            { to: '/activities/new', label: 'Neue Tätigkeit' };
+        const last = data.task ?
+            { to: `/tasks/${data.task.id}`, label: `${data.task.name}` } :
+            { to: '/tasks/new', label: 'Neue Tätigkeit' };
 
         return [
-            { to: '/activities', label: 'Tätigkeiten' },
+            { to: '/tasks', label: 'Tätigkeiten' },
             last
         ];
     }
 }
 
 export async function action({ request, params }: DataFunctionArgs) {
-    const id = params.activityId;
+    const id = params.taskId;
     const user = await authenticator.isAuthenticated(request);
-    const { success, data, fieldErrors } = await validateUpsertActivity(await request.formData());
+    const { success, data, fieldErrors } = await validateUpsertTask(await request.formData());
 
 
     if (!id) {
@@ -36,7 +36,7 @@ export async function action({ request, params }: DataFunctionArgs) {
     }
 
     if (id !== 'new') {
-        const count = await db.activity.count({
+        const count = await db.task.count({
             where: {
                 id,
                 project: {
@@ -55,17 +55,17 @@ export async function action({ request, params }: DataFunctionArgs) {
     }
 
     if (request.method === 'DELETE') {
-        await db.activity.delete({
+        await db.task.delete({
             where: {
                 id
             }
         });
 
-        return redirect('/activities');
+        return redirect('/tasks');
     }
 
     if (success && data) {
-        const activity = await db.activity.upsert({
+        const task = await db.task.upsert({
             where: {
                 id
             },
@@ -82,7 +82,7 @@ export async function action({ request, params }: DataFunctionArgs) {
         });
 
         if (id === 'new') {
-            return redirect(`/activities/${activity.id}`);
+            return redirect(`/tasks/${task.id}`);
         } else {
             return redirectBack(request, { fallback: '/' });
         }
@@ -95,7 +95,7 @@ export async function action({ request, params }: DataFunctionArgs) {
 }
 
 export async function loader({ params, request }: DataFunctionArgs) {
-    const id = params.activityId;
+    const id = params.taskId;
     const user = await authenticator.isAuthenticated(request);
 
     if (!id) {
@@ -107,7 +107,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
     }
 
     if (id !== 'new') {
-        const count = await db.activity.count({
+        const count = await db.task.count({
             where: {
                 id,
                 project: {
@@ -126,7 +126,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
     }
 
     return {
-        activity: await db.activity.findUnique({
+        task: await db.task.findUnique({
             where: {
                 id
             },
@@ -144,19 +144,20 @@ export async function loader({ params, request }: DataFunctionArgs) {
     };
 }
 
-export default function Projects$projectId$() {
+export default function() {
     const params = useParams();
     const fetcher = useFetcher();
     const transition = useTransition();
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
+    const id = params.clientId;
 
     function handleDelete() {
         fetcher.submit(null, { method: 'delete' });
     }
 
     return (
-        <Form method={params.areaId === 'new' ? 'post' : 'put'}>
+        <Form method={id === 'new' ? 'post' : 'put'}>
             <Card shadow="sm" p="md">
                 <Group direction="column" grow>
                     <TextInput
@@ -165,14 +166,14 @@ export default function Projects$projectId$() {
                         autoComplete="off"
                         name="name"
                         error={actionData?.fieldErrors?.name}
-                        defaultValue={loaderData.activity?.name} />
+                        defaultValue={loaderData.task?.name} />
 
                     <Textarea
                         autosize
                         label="Beschreibung"
                         name="description"
                         error={actionData?.fieldErrors?.description}
-                        defaultValue={loaderData.activity?.description}
+                        defaultValue={loaderData.task?.description}
                     />
 
                     <Select
@@ -186,7 +187,7 @@ export default function Projects$projectId$() {
                         label="Projekt"
                         name="projectId"
                         error={actionData?.fieldErrors?.projectId}
-                        defaultValue={loaderData.activity?.projectId}
+                        defaultValue={loaderData.task?.projectId}
                     />
                 </Group>
             </Card>

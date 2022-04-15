@@ -137,19 +137,20 @@ export async function loader({ params, request }: DataFunctionArgs) {
     };
 }
 
-export default function Projects$projectId$() {
+export default function() {
     const params = useParams();
     const fetcher = useFetcher();
     const transition = useTransition();
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
+    const id = params.projectId;
 
     function handleDelete() {
         fetcher.submit(null, { method: 'delete' });
     }
 
     return (
-        <Form method={params.areaId === 'new' ? 'post' : 'put'}>
+        <Form method={id === 'new' ? 'post' : 'put'}>
             <Card shadow="sm" p="md">
                 <Group direction="column" grow>
                     <TextInput

@@ -104,7 +104,7 @@ export default function MainLayout() {
                     })}
                 >
                     <Navbar.Section component={ScrollArea} grow>
-                        <NavbarContent />
+                        <NavbarContent onLinkClick={handleNavbarLinkClick} />
                     </Navbar.Section>
                 </Navbar>
             }

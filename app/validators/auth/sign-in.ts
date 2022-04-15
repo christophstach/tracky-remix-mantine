@@ -3,7 +3,7 @@ import { object, string } from 'yup';
 
 export async function validateSignIn(formData: FormData) {
     const schema = object({
-        email: string().required(),
+        email: string().email().required(),
         password: string().required(),
     })
 

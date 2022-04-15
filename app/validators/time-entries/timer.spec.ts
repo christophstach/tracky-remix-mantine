@@ -1,41 +1,28 @@
 import { yupLocale } from '~/locales/yup-locale';
-import { validateUpsertProject } from '~/validators/projects/upsert-project';
-import { validateTimer } from '~/validators/time-tracks/timer';
+import { validateTimer } from '~/validators/time-entries/timer';
+
 
 describe('validateTimer', () => {
     test('Success', async () => {
         const formData = new FormData()
 
         formData.append('operation', 'start');
-        formData.append('activityId', 'ActivityId');
+        formData.append('taskId', 'taskId');
 
         expect(await validateTimer(formData)).toStrictEqual({
             data: {
                 operation: 'start',
-                activityId: 'ActivityId',
+                taskId: 'taskId',
             },
             success: true
         });
     });
 
     describe('Failure', () => {
-        test('ActivityId required', async () => {
-            const formData = new FormData();
-
-            formData.append('operation', 'stop');
-
-            expect(await validateTimer(formData)).toStrictEqual({
-                fieldErrors: {
-                    activityId: yupLocale.mixed?.required,
-                },
-                success: false
-            });
-        });
-
         test('Operation required', async () => {
             const formData = new FormData();
 
-            formData.append('activityId', 'ActivityId');
+            formData.append('taskId', 'taskId');
 
             expect(await validateTimer(formData)).toStrictEqual({
                 fieldErrors: {
@@ -48,8 +35,8 @@ describe('validateTimer', () => {
         test('Wrong operation', async () => {
             const formData = new FormData();
 
-            formData.append('operation', 'thats wrong');
-            formData.append('activityId', 'ActivityId');
+            formData.append('operation', 'that\'s wrong');
+            formData.append('taskId', 'taskId');
 
             expect(await validateTimer(formData)).toStrictEqual({
                 fieldErrors: {

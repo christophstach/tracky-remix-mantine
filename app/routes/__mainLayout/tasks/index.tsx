@@ -16,7 +16,7 @@ import { forbidden } from 'remix-utils';
 export const handle = {
     breadcrumbs: () => {
         return [
-            { to: '/activities', label: 'Tätigkeiten' }
+            { to: '/tasks', label: 'Tätigkeiten' }
         ];
     }
 }
@@ -49,7 +49,7 @@ export async function loader({ request }: DataFunctionArgs) {
         throw forbidden('Not allowed');
     }
 
-    const activities = await db.activity.findMany({
+    const tasks = await db.task.findMany({
         where: {
             project: {
                 client: {
@@ -70,14 +70,14 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    return { activities };
+    return { tasks };
 }
 
-export default function ActivitiesIndex() {
+export default function() {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
-    const data = useMemo<typeof loaderData.activities>(() => loaderData.activities, [ loaderData.activities ]);
+    const data = useMemo<typeof loaderData.tasks>(() => loaderData.tasks, [ loaderData.tasks ]);
 
-    const columns = useMemo<Column<UnArray<typeof loaderData.activities>>[]>(() => [
+    const columns = useMemo<Column<UnArray<typeof loaderData.tasks>>[]>(() => [
         {
             Header: 'Name',
             accessor: 'name',
@@ -99,7 +99,7 @@ export default function ActivitiesIndex() {
             accessor: 'project',
             width: '25%',
             Cell: (instance) => {
-                return instance.value.name;
+                return instance.value?.name;
             }
         },
         {
@@ -108,7 +108,7 @@ export default function ActivitiesIndex() {
             accessor: 'project',
             width: '25%',
             Cell: (instance) => {
-                return instance.value.client.name;
+                return instance.value?.client?.name;
             }
         },
         {
@@ -121,11 +121,11 @@ export default function ActivitiesIndex() {
 
                 return (
                     <Group spacing="xs" noWrap>
-                        <ActionIcon component={Link} to={`/activities/${value}`} color="blue" variant="light">
+                        <ActionIcon component={Link} to={`/tasks/${value}`} color="blue" variant="light">
                             <IconPencil />
                         </ActionIcon>
 
-                        <fetcher.Form action={`/activities/${value}`} method="delete">
+                        <fetcher.Form action={`/tasks/${value}`} method="delete">
                             <ActionIcon
                                 component="button"
                                 type="submit"
@@ -145,7 +145,7 @@ export default function ActivitiesIndex() {
         <Card shadow="sm" p="md">
             <DataGrid columns={columns} data={data} />
 
-            <TopActions addLink="/activities/new" />
+            <TopActions addLink="/tasks/new" />
         </Card>
     );
 }

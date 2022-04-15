@@ -1,19 +1,19 @@
 import { yupLocale } from '~/locales/yup-locale';
-import { validateUpsertProject } from '~/validators/projects/upsert-project';
+import { validateUpsertTask } from '~/validators/tasks/upsert-task';
 
-describe('validateUpsertProject', () => {
+describe('validateUpsertTask', () => {
     test('Success', async () => {
         const formData = new FormData()
 
         formData.append('name', 'name');
         formData.append('description', 'description');
-        formData.append('clientId', 'clientId');
+        formData.append('projectId', 'projectId');
 
-        expect(await validateUpsertProject(formData)).toStrictEqual({
+        expect(await validateUpsertTask(formData)).toStrictEqual({
             data: {
                 name: 'name',
                 description: 'description',
-                clientId: 'clientId'
+                projectId: 'projectId'
             },
             success: true
         });
@@ -24,9 +24,9 @@ describe('validateUpsertProject', () => {
             const formData = new FormData();
 
             formData.append('description', 'description');
-            formData.append('clientId', 'clientId');
+            formData.append('projectId', 'projectId');
 
-            expect(await validateUpsertProject(formData)).toStrictEqual({
+            expect(await validateUpsertTask(formData)).toStrictEqual({
                 fieldErrors: {
                     name: yupLocale.mixed?.required,
                 },

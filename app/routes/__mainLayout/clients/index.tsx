@@ -64,7 +64,7 @@ export async function loader({ request }: DataFunctionArgs) {
     return { clients };
 }
 
-export default function ClientsIndex() {
+export default function() {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const data = useMemo<typeof loaderData.clients>(() => loaderData.clients, [ loaderData.clients ]);
 

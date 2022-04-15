@@ -5,7 +5,7 @@ import { authenticator } from '~/services/auth.server';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
-    const id = params.timeTrackId;
+    const id = params.timeEntryId;
     const user = await authenticator.isAuthenticated(request);
 
     if (!id) {
@@ -17,10 +17,10 @@ export async function action({ request, params }: DataFunctionArgs) {
     }
 
     if (id !== 'new') {
-        const count = await db.timeTrack.count({
+        const count = await db.timeEntry.count({
             where: {
                 id,
-                activity: {
+                task: {
                     project: {
                         client: {
                             user: {
@@ -38,7 +38,7 @@ export async function action({ request, params }: DataFunctionArgs) {
     }
 
     if (request.method === 'DELETE') {
-        await db.timeTrack.delete({
+        await db.timeEntry.delete({
             where: {
                 id
             }

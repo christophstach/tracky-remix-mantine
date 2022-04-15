@@ -6,12 +6,11 @@ import { db } from '~/services/db.server';
 import { ActionIcon, Box, Button, Card, Group, MediaQuery, Select, Stack, Text } from '@mantine/core';
 import { forwardRef, useEffect, useState } from 'react';
 import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
-import { validateTimer } from '~/validators/time-tracks/timer';
 import { toDuration } from '~/utils/helpers';
 import { useInterval } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { TimeTrackRow } from '~/components/TimeTrackRow';
-import { Activity } from '@prisma/client';
+import { validateTimer } from '~/validators/time-entries/timer';
 
 
 export async function action({ request }: DataFunctionArgs) {
@@ -22,7 +21,7 @@ export async function action({ request }: DataFunctionArgs) {
         throw forbidden('Not allowed');
     }
 
-    const count = await db.activity.count({
+    const count = await db.task.count({
         where: {
             project: {
                 client: {
@@ -42,23 +41,23 @@ export async function action({ request }: DataFunctionArgs) {
         console.log('success', data);
 
         if (data.operation === 'start') {
-            await db.timeTrack.create({
+            await db.timeEntry.create({
                 data: {
                     start: new Date(),
                     end: null,
-                    activityId: data.activityId,
+                    taskId: data.taskId,
                 }
             });
 
             return redirectBack(request, { fallback: '/timer' });
         } else if (data.operation === 'stop') {
-            await db.timeTrack.updateMany({
+            await db.timeEntry.updateMany({
                 data: {
                     end: new Date(),
                 },
                 where: {
                     end: null,
-                    activity: {
+                    task: {
                         project: {
                             client: {
                                 user: {
@@ -86,10 +85,10 @@ export async function loader({ request }: DataFunctionArgs) {
         throw forbidden('Not allowed');
     }
 
-    const currentTimeTrack = await db.timeTrack.findFirst({
+    const currentTimeEntry = await db.timeEntry.findFirst({
         where: {
             end: null,
-            activity: {
+            task: {
                 project: {
                     client: {
                         userId: user.id
@@ -99,12 +98,12 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    const timeTracks = await db.timeTrack.findMany({
+    const timeEntries = await db.timeEntry.findMany({
         orderBy: {
             end: 'desc'
         },
         include: {
-            activity: {
+            task: {
                 include: {
                     project: {
                         include: {
@@ -118,7 +117,7 @@ export async function loader({ request }: DataFunctionArgs) {
             end: {
                 not: null
             },
-            activity: {
+            task: {
                 project: {
                     client: {
                         userId: user.id
@@ -128,7 +127,7 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    const activities = await db.activity.findMany({
+    const tasks = await db.task.findMany({
         orderBy: [
             {
                 name: 'asc',
@@ -162,57 +161,7 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    let defaultActivity: Activity | null;
-
-    const userDefaults = await db.user.findFirst({
-        where: {
-            id: user.id
-        },
-        include: {
-            defaultClient: {
-                include: {
-                    defaultProject: {
-                        include: {
-                            defaultActivity: true
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    if (userDefaults?.defaultClient?.defaultProject?.defaultActivity) {
-        defaultActivity = userDefaults.defaultClient.defaultProject.defaultActivity;
-    } else {
-        defaultActivity = await db.activity.findFirst({
-            orderBy: [
-                {
-                    name: 'asc',
-                },
-                {
-                    project: {
-                        name: 'asc',
-                    }
-                },
-                {
-                    project: {
-                        client: {
-                            name: 'asc',
-                        }
-                    }
-                }
-            ],
-            where: {
-                project: {
-                    client: {
-                        userId: user.id
-                    }
-                }
-            },
-        });
-    }
-
-    return { currentTimeTrack, timeTracks, activities, defaultActivity };
+    return { currentTimeTrack: currentTimeEntry, timeEntries: timeEntries, tasks };
 }
 
 export default function TimerIndex() {
@@ -241,213 +190,218 @@ export default function TimerIndex() {
 
     return (
         <>
-            {loaderData.defaultActivity ? (
-                <fetcher.Form method="post">
-                    <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                        <Card shadow="sm" p="md">
-                            <Stack align="stretch">
+
+            <fetcher.Form method="post">
+                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
+                    <Card shadow="sm" p="md">
+                        <Stack align="stretch">
+                            <Box>
+                                <Select
+                                    searchable
+                                    size="md"
+                                    name="activityId"
+                                    error={fetcher.data?.fieldErrors?.activityId}
+                                    data={loaderData.tasks.map(task => {
+                                        return {
+                                            label: `
+                                                ${task.project?.client && `${task.project.client.name}: `}
+                                                ${task.project && `${task.project.name} - `}
+                                                ${task && task.name}
+                                            `,
+                                            value: task.id,
+                                            ...task
+                                        };
+                                    })}
+                                    filter={(value, item) =>
+                                        item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                    }
+                                    itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.tasks>>((
+                                        {
+                                            name,
+                                            project,
+                                            ...others
+                                        },
+                                        ref
+                                    ) => (
+                                        <div ref={ref} {...others}>
+                                            <Box>
+                                                <Text size="sm">{name}</Text>
+                                                <Text
+                                                    size="xs"
+                                                    color="dimmed"
+                                                >
+                                                    {project?.client && project ? `${project.client.name}: ` : project?.client?.name}
+                                                    {project?.name}
+                                                </Text>
+                                            </Box>
+                                        </div>
+                                    ))}
+                                />
+                            </Box>
+                            {loaderData.currentTimeTrack ? (
                                 <Box>
-                                    <Select
-                                        searchable
-                                        size="md"
-                                        name="activityId"
-                                        error={fetcher.data?.fieldErrors?.activityId}
-                                        defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
-                                        data={loaderData.activities.map(activity => {
-                                            return {
-                                                label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
-                                                value: activity.id,
-                                                ...activity
-                                            };
-                                        })}
-                                        filter={(value, item) =>
-                                            item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                            item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                            item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
-                                        }
-                                        itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
-                                            {
-                                                name,
-                                                project,
-                                                ...others
-                                            },
-                                            ref
-                                        ) => (
-                                            <div ref={ref} {...others}>
-                                                <Box>
-                                                    <Text size="sm">{name}</Text>
-                                                    <Text
-                                                        size="xs"
-                                                        color="dimmed"
-                                                    >{project.name} für {project.client.name}</Text>
-                                                </Box>
-                                            </div>
-                                        ))}
-                                    />
+                                    {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
                                 </Box>
+                            ) : (
+                                <Box></Box>
+                            )}
+                            <Box>
+                                <strong>
+                                    {timer}
+                                </strong>
+                            </Box>
+                            <Box>
                                 {loaderData.currentTimeTrack ? (
-                                    <Box>
-                                        {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
-                                    </Box>
-                                ) : (
-                                    <Box></Box>
-                                )}
-                                <Box>
-                                    <strong>
-                                        {timer}
-                                    </strong>
-                                </Box>
-                                <Box>
-                                    {loaderData.currentTimeTrack ? (
-                                        <Button
-                                            sx={{ width: '100%' }}
-                                            type="submit"
-                                            name="operation"
-                                            value="stop"
-                                            variant="light"
-                                            color="indigo"
-                                            leftIcon={<IconPlayerStop />}
-                                            loading={
-                                                fetcher.state === 'submitting' ||
-                                                fetcher.state === 'loading'
-                                            }
-                                        >
-                                            Stop
-                                        </Button>
-                                    ) : (
-                                        <Button
-                                            sx={{ width: '100%' }}
-                                            type="submit"
-                                            name="operation"
-                                            value="start"
-                                            variant="light"
-                                            color="indigo"
-                                            leftIcon={<IconPlayerPlay />}
-                                            loading={
-                                                fetcher.state === 'submitting' ||
-                                                fetcher.state === 'loading'
-                                            }
-                                        >
-                                            Start
-                                        </Button>
-                                    )}
-                                </Box>
-                            </Stack>
-                        </Card>
-                    </MediaQuery>
-
-                    <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                        <Card shadow="sm" p="md">
-                            <Group>
-                                <Box sx={{ flex: 1 }}>
-                                    <Select
-                                        searchable
-                                        size="md"
-                                        name="activityId"
-                                        error={fetcher.data?.fieldErrors?.activityId}
-                                        defaultValue={loaderData.currentTimeTrack?.activityId || loaderData.defaultActivity?.id}
-                                        data={loaderData.activities.map(activity => {
-                                            return {
-                                                label: `${activity.project.client.name}: ${activity.project.name} - ${activity.name}`,
-                                                value: activity.id,
-                                                ...activity
-                                            };
-                                        })}
-                                        filter={(value, item) =>
-                                            item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                            item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
-                                            item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                    <Button
+                                        sx={{ width: '100%' }}
+                                        type="submit"
+                                        name="operation"
+                                        value="stop"
+                                        variant="light"
+                                        color="indigo"
+                                        leftIcon={<IconPlayerStop />}
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
                                         }
-                                        itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.activities>>((
-                                            {
-                                                name,
-                                                project,
-                                                ...others
-                                            },
-                                            ref
-                                        ) => (
-                                            <div ref={ref} {...others}>
-                                                <Box>
-                                                    <Text size="sm">{name}</Text>
-                                                    <Text
-                                                        size="xs"
-                                                        color="dimmed"
-                                                    >{project.name} für {project.client.name}</Text>
-                                                </Box>
-                                            </div>
-                                        ))}
-                                    />
-                                </Box>
-                                {loaderData.currentTimeTrack ? (
-                                    <Box sx={{ width: '155px' }}>
-                                        {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
-                                    </Box>
+                                    >
+                                        Stop
+                                    </Button>
                                 ) : (
-                                    <Box sx={{ width: '155px' }}></Box>
+                                    <Button
+                                        sx={{ width: '100%' }}
+                                        type="submit"
+                                        name="operation"
+                                        value="start"
+                                        variant="light"
+                                        color="indigo"
+                                        leftIcon={<IconPlayerPlay />}
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
+                                        }
+                                    >
+                                        Start
+                                    </Button>
                                 )}
-                                <Box>
-                                    <strong>
-                                        {timer}
-                                    </strong>
+                            </Box>
+                        </Stack>
+                    </Card>
+                </MediaQuery>
+
+                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
+                    <Card shadow="sm" p="md">
+                        <Group>
+                            <Box sx={{ flex: 1 }}>
+                                <Select
+                                    searchable
+                                    size="md"
+                                    name="activityId"
+                                    error={fetcher.data?.fieldErrors?.taskId}
+                                    data={loaderData.tasks.map(task => {
+                                        return {
+                                            label: `
+                                                    ${task.project?.client && `${task.project.client.name}: `}
+                                                    ${task.project && `${task.project.name} - `}
+                                                    ${task && task.name}
+                                                `,
+                                            value: task.id,
+                                            ...task
+                                        };
+                                    })}
+                                    filter={(value, item) =>
+                                        item.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.name.toLowerCase().includes(value.toLowerCase().trim()) ||
+                                        item.project.client.name.toLowerCase().includes(value.toLowerCase().trim())
+                                    }
+                                    itemComponent={forwardRef<HTMLDivElement, UnArray<typeof loaderData.tasks>>((
+                                        {
+                                            name,
+                                            project,
+                                            ...others
+                                        },
+                                        ref
+                                    ) => (
+                                        <div ref={ref} {...others}>
+                                            <Box>
+                                                <Text size="sm">{name}</Text>
+                                                <Text
+                                                    size="xs"
+                                                    color="dimmed"
+                                                >
+                                                    {project?.client && project ? `${project.client.name}: ` : project?.client?.name}
+                                                    {project?.name}
+                                                </Text>
+                                            </Box>
+                                        </div>
+                                    ))}
+                                />
+                            </Box>
+                            {loaderData.currentTimeTrack ? (
+                                <Box sx={{ width: '155px' }}>
+                                    {dayjs(loaderData.currentTimeTrack.start).format('HH:mm:ss')} bis jetzt
                                 </Box>
-                                <Box>
-                                    {loaderData.currentTimeTrack ? (
-                                        <ActionIcon
-                                            type="submit"
-                                            name="operation"
-                                            value="stop"
-                                            variant="light"
-                                            color="indigo"
-                                            size="lg"
-                                            radius="lg"
-                                            loading={
-                                                fetcher.state === 'submitting' ||
-                                                fetcher.state === 'loading'
-                                            }
-                                        >
-                                            <IconPlayerStop />
-                                        </ActionIcon>
-                                    ) : (
+                            ) : (
+                                <Box sx={{ width: '155px' }}></Box>
+                            )}
+                            <Box>
+                                <strong>
+                                    {timer}
+                                </strong>
+                            </Box>
+                            <Box>
+                                {loaderData.currentTimeTrack ? (
+                                    <ActionIcon
+                                        type="submit"
+                                        name="operation"
+                                        value="stop"
+                                        variant="light"
+                                        color="indigo"
+                                        size="lg"
+                                        radius="lg"
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
+                                        }
+                                    >
+                                        <IconPlayerStop />
+                                    </ActionIcon>
+                                ) : (
 
-                                        <ActionIcon
-                                            type="submit"
-                                            name="operation"
-                                            value="start"
-                                            variant="light"
-                                            color="indigo"
-                                            size="lg"
-                                            radius="lg"
-                                            loading={
-                                                fetcher.state === 'submitting' ||
-                                                fetcher.state === 'loading'
-                                            }
-                                        >
-                                            <IconPlayerPlay />
-                                        </ActionIcon>
+                                    <ActionIcon
+                                        type="submit"
+                                        name="operation"
+                                        value="start"
+                                        variant="light"
+                                        color="indigo"
+                                        size="lg"
+                                        radius="lg"
+                                        loading={
+                                            fetcher.state === 'submitting' ||
+                                            fetcher.state === 'loading'
+                                        }
+                                    >
+                                        <IconPlayerPlay />
+                                    </ActionIcon>
 
-                                    )}
-                                </Box>
-                            </Group>
-                        </Card>
-                    </MediaQuery>
-                </fetcher.Form>
-            ) : (
-                <Card shadow="sm" p="md">
-                    <Text>
-                        Noch keine Tätigkeiten vorhanden. Legen Sie bitte zuerst Klienten, Projekte und Tätigkeit
-                        an.
-                    </Text>
-                </Card>
-            )}
+                                )}
+                            </Box>
+                        </Group>
+                    </Card>
+                </MediaQuery>
+            </fetcher.Form>
 
-            {loaderData.timeTracks.map((timeTrack) => {
+
+            {loaderData.timeEntries.map((timeEntry) => {
                 return (
                     <TimeTrackRow
-                        key={timeTrack.id}
-                        timeTrack={timeTrack}
-                        activity={timeTrack.activity}
-                        project={timeTrack.activity.project}
-                        client={timeTrack.activity.project.client}
+                        key={timeEntry.id}
+                        timeEntry={timeEntry}
+                        task={timeEntry.task}
+                        project={timeEntry.task.project}
+                        client={timeEntry.task?.project?.client}
                     />
                 );
             })}

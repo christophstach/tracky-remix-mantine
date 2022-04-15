@@ -4,16 +4,15 @@ describe('validateSignIn', () => {
     test('Success', async () => {
         const formData = new FormData();
 
-        formData.append('email', 'E-Mail');
-        formData.append('password', 'Password');
+        formData.append('email', 'abc@dfg.de');
+        formData.append('password', 'password');
 
         expect(await validateSignIn(formData)).toStrictEqual({
             data: {
-                email: 'E-Mail',
-                password: 'Password',
+                email: 'abc@dfg.de',
+                password: 'password',
             },
             success: true
         });
     });
-
 });
