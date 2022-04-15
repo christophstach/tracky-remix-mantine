@@ -1,19 +1,9 @@
-import {
-    ActionIcon,
-    Avatar,
-    Box,
-    Center,
-    Divider,
-    Group,
-    MediaQuery,
-    Menu,
-    SegmentedControl,
-    useMantineColorScheme
-} from '@mantine/core';
-import { IconMoon, IconPlayerPlay, IconPlayerStop, IconSun } from '@tabler/icons';
+import { ActionIcon, Avatar, Box, Divider, Group, Menu, useMantineColorScheme } from '@mantine/core';
+import { IconPlayerPlay, IconPlayerStop } from '@tabler/icons';
 import type { User } from '@prisma/client';
 import { Link } from '@remix-run/react';
 import Timer from '~/components/Timer';
+import { ActionIconColorSchemeSwitch } from '~/components/ActionIconColorSchemeSwitch';
 
 interface HeaderContentProps {
     user: Partial<User> | null;
@@ -31,58 +21,14 @@ export default function HeaderContent(props: HeaderContentProps) {
     return (
         <Group align="stretch" sx={{ width: '100%' }}>
             <Box sx={{ flex: 1 }}></Box>
-            <Box sx={{ display: 'flex', alignContent: 'center' }}>
-                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                    <SegmentedControl
-                        value={colorScheme}
-                        onChange={(value: 'light' | 'dark') => toggleColorScheme(value)}
-                        data={[
-                            {
-                                value: 'light',
-                                label: (
-                                    <Center>
-                                        <IconSun size={16} />
-                                    </Center>
-                                ),
-                            },
-                            {
-                                value: 'dark',
-                                label: (
-                                    <Center>
-                                        <IconMoon size={16} />
-                                    </Center>
-                                ),
-                            },
-                        ]}
-                    />
-                </MediaQuery>
-
-                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                    <SegmentedControl
-                        value={colorScheme}
-                        onChange={(value: 'light' | 'dark') => toggleColorScheme(value)}
-                        data={[
-                            {
-                                value: 'light',
-                                label: (
-                                    <Center>
-                                        <IconSun size={16} />
-                                        <Box ml={10}>Hell</Box>
-                                    </Center>
-                                ),
-                            },
-                            {
-                                value: 'dark',
-                                label: (
-                                    <Center>
-                                        <IconMoon size={16} />
-                                        <Box ml={10}>Dunkel</Box>
-                                    </Center>
-                                ),
-                            },
-                        ]}
-                    />
-                </MediaQuery>
+            <Box sx={{
+                display: 'flex',
+                alignItems: 'center'
+            }}>
+                <ActionIconColorSchemeSwitch
+                    colorScheme={colorScheme}
+                    onChange={toggleColorScheme}
+                />
             </Box>
             <Box sx={(theme) => ({
                 paddingLeft: theme.spacing.md,
@@ -91,6 +37,7 @@ export default function HeaderContent(props: HeaderContentProps) {
                 borderLeftColor: '#868e96',
                 display: 'flex',
                 alignItems: 'center',
+                paddingTop: '5px'
             })}>
                 <strong>
                     <Timer start={props.start} end={props.end} />
