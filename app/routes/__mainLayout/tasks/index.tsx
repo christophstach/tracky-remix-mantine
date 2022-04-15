@@ -7,7 +7,7 @@ import { truncate } from '~/utils/helpers';
 import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
-import { DataFunctionArgs } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
 import TopActions from '~/components/TopActions';
@@ -51,11 +51,7 @@ export async function loader({ request }: DataFunctionArgs) {
 
     const tasks = await db.task.findMany({
         where: {
-            project: {
-                client: {
-                    userId
-                }
-            }
+            userId
         },
         orderBy: {
             name: 'asc'
@@ -81,7 +77,6 @@ export default function () {
         {
             Header: 'Name',
             accessor: 'name',
-            width: '25%',
             Cell: (instance) => {
                 return <Box sx={{ whiteSpace: 'nowrap' }}>{instance.value}</Box>;
             }
@@ -89,7 +84,7 @@ export default function () {
         {
             Header: 'Beschreibung',
             accessor: 'description',
-            width: '25%',
+            width: '100%',
             Cell: (instance) => {
                 return truncate(instance.value ? instance.value : '');
             }
@@ -97,18 +92,16 @@ export default function () {
         {
             Header: 'Projekt',
             accessor: 'project',
-            width: '25%',
             Cell: (instance) => {
-                return instance.value?.name;
+                return instance.value?.name || '';
             }
         },
         {
             id: 'client',
             Header: 'Klient',
             accessor: 'project',
-            width: '25%',
             Cell: (instance) => {
-                return instance.value?.client?.name;
+                return instance.value?.client?.name || '';
             }
         },
         {

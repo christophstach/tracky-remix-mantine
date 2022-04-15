@@ -14,4 +14,7 @@ export async function createUsers() {
             lastName: 'Stach',
         }
     });
+
+
+    return { admin };
 }

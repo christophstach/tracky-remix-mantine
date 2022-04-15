@@ -7,7 +7,7 @@ import { Task, Client, Project, TimeEntry } from '@prisma/client'
 
 interface TimeTrackRowProps {
     timeEntry: TimeEntry;
-    task?: Task;
+    task: Task | null | undefined;
     project: Project | null | undefined;
     client: Client | null | undefined;
 }
@@ -17,7 +17,7 @@ export function TimeTrackRow(props: TimeTrackRowProps) {
     const { timeEntry, task, project, client } = props;
 
     return (
-        <fetcher.Form method="delete" action={`/time-tracks/${timeEntry.id}`}>
+        <fetcher.Form method="delete" action={`/time-entries/${timeEntry.id}`}>
             <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
                 <Card shadow="sm" p="md" mt="md">
                     <Stack align="stretch">

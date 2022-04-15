@@ -1,11 +1,10 @@
 import { Form, Link, useActionData, useTransition } from '@remix-run/react';
 
 import { Alert, Box, Button, Card, Divider, Group, PasswordInput, TextInput } from '@mantine/core';
-import { DataFunctionArgs, MetaFunction } from '@remix-run/node';
+import type { DataFunctionArgs, MetaFunction } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { AuthorizationError } from 'remix-auth';
 import { validateSignIn } from '~/validators/auth/sign-in';
-import { unauthorized } from 'remix-utils';
 
 export const meta: MetaFunction = () => {
     return {
@@ -20,7 +19,7 @@ export async function action({ request }: DataFunctionArgs) {
     if (success) {
         try {
             await authenticator.authenticate('form', request, {
-                successRedirect: '/timer',
+                successRedirect: '/time-entries',
                 throwOnError: true,
                 context: formData, // optional
             });
@@ -30,17 +29,17 @@ export async function action({ request }: DataFunctionArgs) {
             }
 
             if (error instanceof AuthorizationError) {
-                return unauthorized({ error: error.message });
+                return { error: error.message };
             }
         }
     } else {
-        return unauthorized({ fieldErrors });
+        return { fieldErrors };
     }
 }
 
 export async function loader({ request }: DataFunctionArgs) {
     await authenticator.isAuthenticated(request, {
-        successRedirect: '/timer',
+        successRedirect: '/time-entries',
     });
 
     return null;
@@ -49,7 +48,6 @@ export async function loader({ request }: DataFunctionArgs) {
 export default function AuthSignInRoute() {
     const transition = useTransition();
     const actionData = useActionData();
-
     const busy = transition.state === 'submitting' || transition.state === 'loading';
 
     return (

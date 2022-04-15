@@ -12,7 +12,7 @@ import {
 } from '@mantine/core';
 import type { DataFunctionArgs } from '@remix-run/node';
 import { MetaFunction } from '@remix-run/node';
-import { Link, Outlet, useLoaderData, useMatches, } from '@remix-run/react';
+import { Link, Outlet, useFetcher, useLoaderData, useMatches, } from '@remix-run/react';
 import { authenticator } from '~/services/auth.server';
 import { useState } from 'react';
 import HeaderContent from '~/components/HeaderContent';
@@ -43,10 +43,18 @@ export async function loader({ request }: DataFunctionArgs) {
         },
     });
 
-    return { user };
+    const currentTimeEntry = await db.timeEntry.findFirst({
+        where: {
+            userId,
+            end: null,
+        },
+    });
+
+    return { user, currentTimeEntry };
 }
 
 export default function MainLayout() {
+    const fetcher = useFetcher();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const theme = useMantineTheme();
     const [ opened, setOpened ] = useState(false);
@@ -59,6 +67,20 @@ export default function MainLayout() {
 
     function handleNavbarLinkClick() {
         setOpened(false);
+    }
+
+    function handleTimerStart() {
+        fetcher.submit({}, {
+            method: 'post',
+            action: '/timer/start',
+        });
+    }
+
+    function handleTimerStop() {
+        fetcher.submit({}, {
+            method: 'post',
+            action: '/timer/stop',
+        });
     }
 
     return (
@@ -99,7 +121,17 @@ export default function MainLayout() {
                                 mr="xl"
                             />
                         </MediaQuery>
-                        <HeaderContent user={loaderData.user} />
+                        <HeaderContent
+                            user={loaderData.user}
+                            start={loaderData.currentTimeEntry?.start}
+                            end={loaderData.currentTimeEntry?.end}
+                            onStart={handleTimerStart}
+                            onStop={handleTimerStop}
+                            loading={
+                                fetcher.state === 'submitting' ||
+                                fetcher.state === 'loading'
+                            }
+                        />
                     </div>
                 </Header>
             }

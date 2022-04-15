@@ -1,7 +1,9 @@
 import { db } from '~/services/db.server';
-import { DataFunctionArgs, redirect } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
+import { setNotification } from '~/services/notification-session.server';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
@@ -20,15 +22,7 @@ export async function action({ request, params }: DataFunctionArgs) {
         const count = await db.timeEntry.count({
             where: {
                 id,
-                task: {
-                    project: {
-                        client: {
-                            user: {
-                                id: userId
-                            }
-                        }
-                    }
-                }
+                userId
             }
         });
 
@@ -44,7 +38,16 @@ export async function action({ request, params }: DataFunctionArgs) {
             }
         });
 
-        return redirect('/timer');
+        return redirect('/time-entries', {
+            headers: {
+                'Set-Cookie': await setNotification(
+                    request.headers.get('Cookie'),
+                    'success',
+                    'Zeiteintrag gelöscht',
+                    'Der Zeiteintrag wurde erfolgreich gelöscht'
+                )
+            }
+        });
     }
 }
 

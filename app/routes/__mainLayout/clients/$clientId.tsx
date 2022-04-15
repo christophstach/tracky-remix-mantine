@@ -1,7 +1,8 @@
 import { Form, useActionData, useFetcher, useLoaderData, useParams, useTransition } from '@remix-run/react';
 import { Card, Group, Textarea, TextInput } from '@mantine/core';
 import { db } from '~/services/db.server';
-import { DataFunctionArgs, redirect } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { validateUpsertClient } from '~/validators/clients/upsert-client';
@@ -39,9 +40,7 @@ export async function action({ request, params }: DataFunctionArgs) {
         const count = await db.client.count({
             where: {
                 id,
-                user: {
-                    id: userId
-                }
+                userId
             }
         });
 
@@ -57,7 +56,16 @@ export async function action({ request, params }: DataFunctionArgs) {
             }
         });
 
-        return redirect('/clients');
+        return redirect('/clients', {
+            headers: {
+                'Set-Cookie': await setNotification(
+                    request.headers.get('Cookie'),
+                    'success',
+                    'Klient gelöscht',
+                    'Der Klient wurde erfolgreich gelöscht'
+                )
+            }
+        });
     }
 
     if (success && data) {

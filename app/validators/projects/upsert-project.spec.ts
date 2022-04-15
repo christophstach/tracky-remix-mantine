@@ -13,7 +13,7 @@ describe('validateUpsertProject', () => {
             data: {
                 name: 'name',
                 description: 'description',
-                clientId: 'clientId'
+                clientId: 'clientId',
             },
             success: true
         });

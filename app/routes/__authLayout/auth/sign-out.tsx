@@ -1,7 +1,6 @@
 import { Form } from '@remix-run/react';
 import { createRef, useEffect } from 'react';
-
-import { ActionFunction, MetaFunction } from '@remix-run/node';
+import type { ActionFunction, MetaFunction } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 
 export const meta: MetaFunction = () => {
@@ -11,7 +10,7 @@ export const meta: MetaFunction = () => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
-    return await  authenticator.logout(request, {
+    return await authenticator.logout(request, {
         redirectTo: '/'
     });
 }

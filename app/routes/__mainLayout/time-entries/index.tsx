@@ -1,6 +1,6 @@
-import { DataFunctionArgs } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import { useFetcher, useLoaderData } from '@remix-run/react';
-import { forbidden, notFound, redirectBack } from 'remix-utils';
+import { forbidden, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
 import { ActionIcon, Box, Button, Card, Group, MediaQuery, Select, Stack, Text } from '@mantine/core';
@@ -10,91 +10,37 @@ import { toDuration } from '~/utils/helpers';
 import { useInterval } from '@mantine/hooks';
 import dayjs from 'dayjs';
 import { TimeTrackRow } from '~/components/TimeTrackRow';
-import { validateTimer } from '~/validators/time-entries/timer';
 
-
-export async function action({ request }: DataFunctionArgs) {
-    const user = await authenticator.isAuthenticated(request);
-    const { success, data, fieldErrors } = await validateTimer(await request.formData());
-
-    if (!user) {
-        throw forbidden('Not allowed');
-    }
-
-    const count = await db.task.count({
-        where: {
-            project: {
-                client: {
-                    user: {
-                        id: user.id
-                    },
-                }
-            },
-        }
-    });
-
-    if (count === 0) {
-        throw notFound('Not found');
-    }
-
-    if (success && data) {
-        console.log('success', data);
-
-        if (data.operation === 'start') {
-            await db.timeEntry.create({
-                data: {
-                    start: new Date(),
-                    end: null,
-                    taskId: data.taskId,
-                }
-            });
-
-            return redirectBack(request, { fallback: '/timer' });
-        } else if (data.operation === 'stop') {
-            await db.timeEntry.updateMany({
-                data: {
-                    end: new Date(),
-                },
-                where: {
-                    end: null,
-                    task: {
-                        project: {
-                            client: {
-                                user: {
-                                    id: user.id
-                                },
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        return redirectBack(request, { fallback: '/timer' });
-    } else {
-        console.log('failure', fieldErrors);
-
-        return { fieldErrors };
+export const handle = {
+    breadcrumbs: () => {
+        return [
+            { to: '/time-entries', label: 'Zeiterfassung' }
+        ];
     }
 }
 
-export async function loader({ request }: DataFunctionArgs) {
-    const user = await authenticator.isAuthenticated(request);
 
-    if (!user) {
+export async function action({ request }: DataFunctionArgs) {
+    const userId = await authenticator.isAuthenticated(request);
+
+    if (!userId) {
+        throw forbidden('Not allowed');
+    }
+
+    return redirectBack(request, { fallback: '/time-entries' });
+}
+
+export async function loader({ request }: DataFunctionArgs) {
+    const userId = await authenticator.isAuthenticated(request);
+
+    if (!userId) {
         throw forbidden('Not allowed');
     }
 
     const currentTimeEntry = await db.timeEntry.findFirst({
         where: {
             end: null,
-            task: {
-                project: {
-                    client: {
-                        userId: user.id
-                    }
-                }
-            }
+            userId
         }
     });
 
@@ -117,13 +63,7 @@ export async function loader({ request }: DataFunctionArgs) {
             end: {
                 not: null
             },
-            task: {
-                project: {
-                    client: {
-                        userId: user.id
-                    }
-                }
-            }
+            userId
         }
     });
 
@@ -146,11 +86,7 @@ export async function loader({ request }: DataFunctionArgs) {
             }
         ],
         where: {
-            project: {
-                client: {
-                    userId: user.id
-                }
-            }
+            userId
         },
         include: {
             project: {
@@ -199,8 +135,8 @@ export default function TimerIndex() {
                                 <Select
                                     searchable
                                     size="md"
-                                    name="activityId"
-                                    error={fetcher.data?.fieldErrors?.activityId}
+                                    name="taskId"
+                                    error={fetcher.data?.fieldErrors?.taskId}
                                     data={loaderData.tasks.map(task => {
                                         return {
                                             label: `
@@ -298,7 +234,7 @@ export default function TimerIndex() {
                                 <Select
                                     searchable
                                     size="md"
-                                    name="activityId"
+                                    name="taskId"
                                     error={fetcher.data?.fieldErrors?.taskId}
                                     data={loaderData.tasks.map(task => {
                                         return {
@@ -400,7 +336,7 @@ export default function TimerIndex() {
                         key={timeEntry.id}
                         timeEntry={timeEntry}
                         task={timeEntry.task}
-                        project={timeEntry.task.project}
+                        project={timeEntry.task?.project}
                         client={timeEntry.task?.project?.client}
                     />
                 );

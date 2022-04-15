@@ -7,8 +7,7 @@ import { truncate } from '~/utils/helpers';
 import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
-import HeaderActions from '~/components/HeaderActions';
-import { DataFunctionArgs } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
 import TopActions from '~/components/TopActions';
@@ -52,9 +51,7 @@ export async function loader({ request }: DataFunctionArgs) {
 
     const projects = await db.project.findMany({
         where: {
-            client: {
-                userId
-            }
+            userId
         },
         orderBy: {
             name: 'asc'
@@ -68,7 +65,7 @@ export async function loader({ request }: DataFunctionArgs) {
     return { projects };
 }
 
-export default function() {
+export default function () {
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
     const data = useMemo<typeof loaderData.projects>(() => loaderData.projects, [ loaderData.projects ]);
 
@@ -76,7 +73,6 @@ export default function() {
         {
             Header: 'Name',
             accessor: 'name',
-            width: '33%',
             Cell: (instance) => {
                 return <Box sx={{ whiteSpace: 'nowrap' }}>{instance.value}</Box>;
             }
@@ -84,7 +80,7 @@ export default function() {
         {
             Header: 'Beschreibung',
             accessor: 'description',
-            width: '33%',
+            width: '100%',
             Cell: (instance) => {
                 return truncate(instance.value ? instance.value : '');
             }
@@ -92,9 +88,8 @@ export default function() {
         {
             Header: 'Klient',
             accessor: 'client',
-            width: '33%',
             Cell: (instance) => {
-                return instance.value?.name;
+                return instance.value?.name || '';
             }
         },
         {
@@ -102,7 +97,7 @@ export default function() {
             accessor: '_count',
             disableSortBy: true,
             Cell: (instance) => {
-                return instance.value?.tasks;
+                return instance.value?.tasks || '';
             }
         },
         {

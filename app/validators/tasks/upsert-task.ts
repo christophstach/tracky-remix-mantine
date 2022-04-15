@@ -5,7 +5,12 @@ export async function validateUpsertTask(formData: FormData) {
     const schema = object({
         name: string().required(),
         description: string().default(''),
-        projectId: string().nullable().required(),
+        projectId: string().nullable(),
+    }).transform((value) => {
+        return {
+            ...value,
+            projectId: value.projectId ? value.projectId : null
+        };
     });
 
     return validateWithSchema(

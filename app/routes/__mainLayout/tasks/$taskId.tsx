@@ -1,7 +1,8 @@
 import { Form, useActionData, useFetcher, useLoaderData, useParams, useTransition } from '@remix-run/react';
 import { Card, Group, Select, Textarea, TextInput } from '@mantine/core';
 import { db } from '~/services/db.server';
-import { DataFunctionArgs, redirect } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import BottomActions from '~/components/BottomActions';
 import { authenticator } from '~/services/auth.server';
@@ -27,7 +28,6 @@ export async function action({ request, params }: DataFunctionArgs) {
     const userId = await authenticator.isAuthenticated(request);
     const { success, data, fieldErrors } = await validateUpsertTask(await request.formData());
 
-
     if (!id) {
         throw badRequest('Id not set');
     }
@@ -40,13 +40,7 @@ export async function action({ request, params }: DataFunctionArgs) {
         const count = await db.task.count({
             where: {
                 id,
-                project: {
-                    client: {
-                        user: {
-                            id: userId
-                        }
-                    }
-                }
+                userId
             }
         });
 
@@ -62,7 +56,16 @@ export async function action({ request, params }: DataFunctionArgs) {
             }
         });
 
-        return redirect('/tasks');
+        return redirect('/tasks', {
+            headers: {
+                'Set-Cookie': await setNotification(
+                    request.headers.get('Cookie'),
+                    'success',
+                    'Tätigkeit gelöscht',
+                    'Die Tätigkeit wurde erfolgreich gelöscht'
+                )
+            }
+        });
     }
 
     if (success && data) {
@@ -74,11 +77,13 @@ export async function action({ request, params }: DataFunctionArgs) {
                 name: data.name,
                 description: data.description,
                 projectId: data.projectId,
+                userId,
             },
             update: {
                 name: data.name,
                 description: data.description,
                 projectId: data.projectId,
+                userId
             }
         });
 
@@ -129,13 +134,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
         const count = await db.task.count({
             where: {
                 id,
-                project: {
-                    client: {
-                        user: {
-                            id: userId
-                        }
-                    }
-                }
+                userId
             }
         });
 
@@ -155,9 +154,7 @@ export async function loader({ params, request }: DataFunctionArgs) {
                 name: 'asc'
             },
             where: {
-                client: {
-                    userId: userId
-                }
+                userId
             }
         })
     };
@@ -169,7 +166,7 @@ export default function () {
     const transition = useTransition();
     const actionData = useActionData<InferDataFunction<typeof action>>();
     const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
-    const id = params.clientId;
+    const id = params.taskId;
 
     function handleDelete() {
         fetcher.submit(null, { method: 'delete' });
@@ -196,6 +193,7 @@ export default function () {
                     />
 
                     <Select
+                        clearable
                         searchable
                         data={loaderData.projects.map((client) => {
                             return {

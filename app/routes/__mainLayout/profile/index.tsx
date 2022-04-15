@@ -1,4 +1,4 @@
-import { DataFunctionArgs } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import { Card, Group, TextInput } from '@mantine/core';
 import { Form, useActionData, useLoaderData, useTransition } from '@remix-run/react';
 import BottomActions from '~/components/BottomActions';

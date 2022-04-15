@@ -8,7 +8,7 @@ import { db } from '~/services/db.server';
 import DataGrid from '../../../components/DataGrid';
 import { IconPencil, IconTrash } from '@tabler/icons';
 import { authenticator } from '~/services/auth.server';
-import { DataFunctionArgs } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
 import { forbidden } from 'remix-utils';
 import TopActions from '~/components/TopActions';
 

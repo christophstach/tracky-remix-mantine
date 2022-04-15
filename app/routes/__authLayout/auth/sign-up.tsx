@@ -1,7 +1,7 @@
 import { Form, Link, useActionData, useTransition } from '@remix-run/react';
-
 import { Alert, Box, Button, Card, Divider, Group, PasswordInput, TextInput } from '@mantine/core';
-import { DataFunctionArgs, MetaFunction, redirect } from '@remix-run/node';
+import type { DataFunctionArgs, MetaFunction } from '@remix-run/node';
+import { redirect } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { validateSignUp } from '~/validators/auth/sign-up';
 import * as bcrypt from 'bcryptjs';

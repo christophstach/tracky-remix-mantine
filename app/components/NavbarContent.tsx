@@ -23,7 +23,7 @@ export default function NavbarContent(props: NavbarContentProps) {
             <NavbarLink
                 icon={IconClock}
                 iconColor="lime"
-                to="/timer"
+                to="/time-entries"
                 label="Zeiterfassung"
                 onClick={props.onLinkClick}
                 exact
