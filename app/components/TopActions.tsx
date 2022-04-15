@@ -16,7 +16,7 @@ export default function TopActions(props: TopActionsProps) {
             p="md"
             my="md"
             sx={(theme) => ({ display: 'flex', gap: theme.spacing.md })}>
-            <Box sx={{ flex: 1, textAlign: 'right' }}>
+            <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
                 <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
                     <Button
                         leftIcon={<IconPlus />}
