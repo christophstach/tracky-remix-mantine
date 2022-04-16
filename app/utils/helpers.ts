@@ -93,5 +93,4 @@ export function toDuration(startDate: Date, endDate: Date) {
     const diff = end.diff(start);
 
     return dayjs.duration(diff);
-
 }

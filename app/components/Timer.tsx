@@ -29,13 +29,9 @@ export default function Timer(props: TimerProps) {
 
         return () => {
             interval.stop();
-        }
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ props.start ]);
 
-    return (
-        <>
-            {time}
-        </>
-    );
+    return <span>{time}</span>;
 }

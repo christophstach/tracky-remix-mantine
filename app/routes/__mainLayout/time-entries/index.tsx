@@ -8,7 +8,7 @@ import { setNotification } from '~/services/notification-session.server';
 import { validateUpdateTimeEntryText } from '~/validators/time-entries/update-time-entry-text';
 import { Accordion, Box, Card, Group, Text } from '@mantine/core';
 import dayjs from 'dayjs';
-import CumulatedTimer from '~/components/ComulatedTimer';
+import CumulatedTimer from '~/components/CumulatedTimer';
 
 export const handle = {
     breadcrumbs: () => {

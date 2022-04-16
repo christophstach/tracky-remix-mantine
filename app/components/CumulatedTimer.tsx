@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useInterval } from '@mantine/hooks';
 import { toDuration } from '~/utils/helpers';
-import { Duration } from 'dayjs/plugin/duration';
+import type { Duration } from 'dayjs/plugin/duration';
+
+interface StartEndDuration {
+    start: Date;
+    end: Date | null | undefined;
+}
 
 interface CumulatedTimerProps {
-    durations: {
-        start: Date;
-        end: Date | null | undefined;
-    }[];
+    durations: StartEndDuration[];
 }
 
 export default function CumulatedTimer(props: CumulatedTimerProps) {
@@ -15,11 +17,8 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     const format = 'HH:mm:ss';
     const [ time, setTime ] = useState<string | null>(defaultTime);
 
-    function toTotalDuration(startEndDurations: {
-        start: Date;
-        end: Date | null | undefined;
-    }[]): Duration {
-        const durations = props.durations.map((duration) => {
+    function toTotalDuration(startEndDurations: StartEndDuration[]): Duration {
+        const durations = startEndDurations.map((duration) => {
             if (duration.end) {
                 return toDuration(duration.start, duration.end);
             } else {
@@ -51,13 +50,9 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
 
         return () => {
             interval.stop();
-        }
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ props.durations ]);
 
-    return (
-        <>
-            {time}
-        </>
-    );
+    return <span>{time}</span>;
 }
