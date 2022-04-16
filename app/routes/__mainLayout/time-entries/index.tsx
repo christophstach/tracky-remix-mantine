@@ -6,9 +6,10 @@ import { db } from '~/services/db.server';
 import { TimeEntryRow } from '~/components/TimeEntryRow';
 import { setNotification } from '~/services/notification-session.server';
 import { validateUpdateTimeEntryText } from '~/validators/time-entries/update-time-entry-text';
-import { Accordion, Box, Card, Group, Text } from '@mantine/core';
+import { Accordion, Box, Card, Divider, Group, Text } from '@mantine/core';
 import dayjs from 'dayjs';
 import CumulatedTimer from '~/components/CumulatedTimer';
+import { IconLayoutDistributeVertical } from '@tabler/icons';
 
 export const handle = {
     breadcrumbs: () => {
@@ -419,11 +420,24 @@ export default function TimerIndex() {
                             </Box>
                         </Group>
 
-                        <Card.Section>
-                            <Accordion multiple initialItem={dayIndex === 0 ? 0 : -1}>
+                        <Card.Section mt="sm">
+                            <Divider />
+                            <Accordion
+                                multiple
+                                initialItem={dayIndex === 0 ? 0 : -1}
+                                pb={0}
+                                styles={{
+                                    contentInner: {
+                                        paddingBottom: '5px'
+                                    },
+                                    item: {
+                                        paddingBottom: '0px !important'
+                                    }
+                                }}
+                            >
                                 {day.timeEntries.map((timeEntry, timeEntryIndex) => {
                                     return (
-                                        <Accordion.Item opened key={timeEntry.id} label={timeEntry.text} pb={0}>
+                                        <Accordion.Item opened key={timeEntry.id} label={timeEntry.text} pb={5}>
                                             <TimeEntryRow
                                                 key={timeEntry.id}
                                                 timeEntry={timeEntry}

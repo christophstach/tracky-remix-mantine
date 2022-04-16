@@ -4,13 +4,14 @@ import { redirect } from '@remix-run/node';
 import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { setNotification } from '~/services/notification-session.server';
-import { Alert, Card, Group, Stack, TextInput } from '@mantine/core';
+import { Card, Group, Select, Stack, TextInput } from '@mantine/core';
 import { Form, useActionData, useFetcher, useLoaderData, useParams, useTransition } from '@remix-run/react';
 import BottomActions from '~/components/BottomActions';
 import { validateUpdateTimeEntry } from '~/validators/time-entries/update-time-entry';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { useState } from 'react';
 import dayjs from 'dayjs';
+import type { Task } from '@prisma/client';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
@@ -68,7 +69,8 @@ export async function action({ request, params }: DataFunctionArgs) {
             data: {
                 text: data.text,
                 start: data.start,
-                end: data.end
+                end: data.end,
+                taskId: data.taskId
             }
         });
 
@@ -110,7 +112,16 @@ export async function loader({ params, request }: DataFunctionArgs) {
         }
     });
 
-    return { timeEntry };
+    const tasks = await db.task.findMany({
+        orderBy: {
+            name: 'asc'
+        },
+        where: {
+            userId
+        }
+    });
+
+    return { timeEntry, tasks };
 }
 
 interface LoaderReturnType {
@@ -119,7 +130,9 @@ interface LoaderReturnType {
         text: string;
         start: string;
         end: string | null | undefined;
+        taskId: string | null | undefined;
     };
+    tasks: Task[];
 }
 
 
@@ -192,7 +205,6 @@ export default function () {
                         />
                     </Group>
 
-                    <input type="hidden" name="start" value={start?.toISOString()} />
 
                     <Group grow align="start">
                         <DatePicker
@@ -212,8 +224,22 @@ export default function () {
                         />
                     </Group>
 
-                    <input type="hidden" name="end" value={end?.toISOString()} />
+                    <Select
+                        searchable
+                        clearable
+                        name="taskId"
+                        label="Tätigkeit"
+                        defaultValue={loaderData.timeEntry.taskId}
+                        data={loaderData.tasks.map((task) => ({
+                            label: task.name,
+                            value: task.id
+                        }))}
+                        error={actionData?.fieldErrors.taskId}
+                    />
                 </Stack>
+
+                <input type="hidden" name="start" value={start?.toISOString()} />
+                <input type="hidden" name="end" value={end?.toISOString()} />
             </Card>
 
             <BottomActions

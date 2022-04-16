@@ -16,7 +16,9 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     const defaultTime = '00:00:00';
     const format = 'HH:mm:ss';
     const syncedTimer = useContext(SyncedTimerContext);
-    const [ time, setTime ] = useState<string | null>(defaultTime);
+    const [ time, setTime ] = useState<string | null>(
+        props.durations.length > 0 ? toTotalDuration(props.durations).format(format) : defaultTime
+    );
 
     function toTotalDuration(startEndDurations: StartEndDuration[]): Duration {
         const durations = startEndDurations.map((duration) => {
