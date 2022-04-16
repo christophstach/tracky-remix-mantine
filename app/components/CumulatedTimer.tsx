@@ -34,18 +34,23 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     }, 1000);
 
     useEffect(() => {
+        interval.stop();
+
         if (props.durations.length > 0) {
             const hasRunningDuration = props.durations.some((duration) => duration.end === null);
-            setTime(toTotalDuration(props.durations).format(format))
+            setTime(toTotalDuration(props.durations).format(format));
 
             if (hasRunningDuration) {
                 interval.start();
-            } else {
-                interval.stop();
+
+                setTimeout(() => {
+                    if (!interval.active) {
+                        interval.start();
+                    }
+                }, 1000);
             }
         } else {
             setTime(defaultTime);
-            interval.stop();
         }
 
         return () => {
