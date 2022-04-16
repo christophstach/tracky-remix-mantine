@@ -1,6 +1,6 @@
 import { toDuration } from '~/utils/helpers';
-import { useEffect, useState } from 'react';
-import { useInterval } from '@mantine/hooks';
+import { useContext, useEffect, useState } from 'react';
+import { SyncedTimerContext } from '~/contexts/synced-timer';
 
 interface TimerProps {
     start: Date | null | undefined;
@@ -12,26 +12,23 @@ export default function Timer(props: TimerProps) {
     const format = 'HH:mm:ss';
     const [ time, setTime ] = useState<string | null>(defaultTime);
 
-    const interval = useInterval(() => {
-        if (props.start) {
-            setTime(toDuration(props.start, new Date()).format(format));
-        }
-    }, 1000);
+    const syncedTimer = useContext(SyncedTimerContext);
 
     useEffect(() => {
-        if (props.start) {
-            setTime(toDuration(props.start, new Date()).format(format));
-            interval.start();
-        } else {
-            setTime(defaultTime);
-            interval.stop();
-        }
+        const subscription = syncedTimer.subscribe(() => {
+            if (props.start) {
+                setTime(toDuration(props.start, new Date()).format(format));
+            }
+        });
+
+        syncedTimer.trigger();
 
         return () => {
-            interval.stop();
+            subscription.unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ props.start ]);
+
 
     return <span>{time}</span>;
 }

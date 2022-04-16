@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { useInterval } from '@mantine/hooks';
+import { useContext, useEffect, useState } from 'react';
 import { toDuration } from '~/utils/helpers';
 import type { Duration } from 'dayjs/plugin/duration';
+import { SyncedTimerContext } from '~/contexts/synced-timer';
 
 interface StartEndDuration {
     start: Date;
@@ -17,6 +17,8 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     const format = 'HH:mm:ss';
     const [ time, setTime ] = useState<string | null>(defaultTime);
 
+    const syncedTimer = useContext(SyncedTimerContext);
+
     function toTotalDuration(startEndDurations: StartEndDuration[]): Duration {
         const durations = startEndDurations.map((duration) => {
             if (duration.end) {
@@ -29,35 +31,23 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
         return durations.reduce((acc, curr) => acc.add(curr));
     }
 
-    const interval = useInterval(() => {
-        setTime(toTotalDuration(props.durations).format(format))
-    }, 1000);
-
     useEffect(() => {
-        interval.stop();
+        const hasRunningDuration = props.durations.some((duration) => duration.end === null);
 
-        if (props.durations.length > 0) {
-            const hasRunningDuration = props.durations.some((duration) => duration.end === null);
-            setTime(toTotalDuration(props.durations).format(format));
-
+        const subscription = syncedTimer.subscribe(() => {
             if (hasRunningDuration) {
-                interval.start();
-
-                setTimeout(() => {
-                    if (!interval.active) {
-                        interval.start();
-                    }
-                }, 1000);
+                setTime(toTotalDuration(props.durations).format(format));
             }
-        } else {
-            setTime(defaultTime);
-        }
+        });
+
+        syncedTimer.trigger();
 
         return () => {
-            interval.stop();
+            subscription.unsubscribe();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ props.durations ]);
+
 
     return <span>{time}</span>;
 }
