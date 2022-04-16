@@ -10,9 +10,8 @@ interface TimerProps {
 export default function Timer(props: TimerProps) {
     const defaultTime = '00:00:00';
     const format = 'HH:mm:ss';
-    const [ time, setTime ] = useState<string | null>(defaultTime);
-
     const syncedTimer = useContext(SyncedTimerContext);
+    const [ time, setTime ] = useState<string | null>(defaultTime);
 
     useEffect(() => {
         const subscription = syncedTimer.subscribe(() => {
