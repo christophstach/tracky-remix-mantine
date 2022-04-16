@@ -3,9 +3,9 @@ import { useLoaderData } from '@remix-run/react';
 import { badRequest, forbidden, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
-import { TimEntryRow } from '~/components/TimEntryRow';
+import { TimeEntryRow } from '~/components/TimeEntryRow';
 import { setNotification } from '~/services/notification-session.server';
-import { validateUpdateTimeEntry } from '~/validators/time-entries/updateTimeEntry';
+import { validateUpdateTimeEntryText } from '~/validators/time-entries/update-time-entry-text';
 
 export const handle = {
     breadcrumbs: () => {
@@ -17,7 +17,7 @@ export const handle = {
 
 export async function action({ request }: DataFunctionArgs) {
     const userId = await authenticator.isAuthenticated(request);
-    const { success, data, fieldErrors } = await validateUpdateTimeEntry(await request.formData());
+    const { success, data, fieldErrors } = await validateUpdateTimeEntryText(await request.formData());
     const id = data?.id;
 
     if (!id) {
@@ -118,14 +118,15 @@ export default function TimerIndex() {
 
     return (
         <>
-            {loaderData.timeEntries.map((timeEntry) => {
+            {loaderData.timeEntries.map((timeEntry, index) => {
                 return (
-                    <TimEntryRow
+                    <TimeEntryRow
                         key={timeEntry.id}
                         timeEntry={timeEntry}
                         task={timeEntry.task}
                         project={timeEntry.task?.project}
                         client={timeEntry.task?.project?.client}
+                        focus={index === 0}
                     />
                 );
             })}
