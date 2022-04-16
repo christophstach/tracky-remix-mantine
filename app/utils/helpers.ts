@@ -87,11 +87,11 @@ export function parseIdParam(param: string | undefined) {
     }
 }
 
-export function toDuration(startDate: Date, endDate: Date, format = 'HH:mm:ss') {
+export function toDuration(startDate: Date, endDate: Date) {
     const start = dayjs(startDate);
     const end = dayjs(endDate);
     const diff = end.diff(start);
-    const duration = dayjs.duration(diff);
 
-    return duration.format(format);
+    return dayjs.duration(diff);
+
 }

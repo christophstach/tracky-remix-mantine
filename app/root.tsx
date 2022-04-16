@@ -13,18 +13,22 @@ import { setLocale } from 'yup';
 import styles from '~/styles/global.css';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
+import weekday from 'dayjs/plugin/weekday';
+import type { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
 import { ServerError } from '~/components/ServerError';
-import { ColorScheme, Divider } from '@mantine/core';
+import type { ColorScheme } from '@mantine/core';
+import { Divider } from '@mantine/core';
 import { MantineTheme } from '~/components/MantineTheme';
 import { NotificationsProvider, showNotification } from '@mantine/notifications';
-import { DataFunctionArgs, json } from '@remix-run/node';
+import type { DataFunctionArgs } from '@remix-run/node';
+import { json } from '@remix-run/node';
 import { userPreferencesSessionStorage } from '~/services/user-preferences-session.server';
 import { yupLocale } from '~/locales/yup-locale';
 import { notificationSessionStorage } from '~/services/notification-session.server';
 import { useEffect } from 'react';
 
 dayjs.extend(duration);
+dayjs.extend(weekday);
 
 setLocale(yupLocale);
 

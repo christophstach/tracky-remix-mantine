@@ -9,17 +9,18 @@ interface TimerProps {
 
 export default function Timer(props: TimerProps) {
     const defaultTime = '00:00:00';
+    const format = 'HH:mm:ss';
     const [ time, setTime ] = useState<string | null>(defaultTime);
 
     const interval = useInterval(() => {
         if (props.start) {
-            setTime(toDuration(props.start, new Date()));
+            setTime(toDuration(props.start, new Date()).format(format));
         }
     }, 1000);
 
     useEffect(() => {
         if (props.start) {
-            setTime(toDuration(props.start, new Date()));
+            setTime(toDuration(props.start, new Date()).format(format));
             interval.start();
         } else {
             setTime(defaultTime);

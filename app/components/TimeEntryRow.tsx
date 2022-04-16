@@ -1,5 +1,5 @@
 import { Link, useFetcher } from '@remix-run/react';
-import { Box, Card, Divider, Menu, Text, TextInput } from '@mantine/core';
+import { Box, Divider, Menu, Text, TextInput } from '@mantine/core';
 import dayjs from 'dayjs';
 import { toDuration } from '~/utils/helpers';
 import { IconTrash } from '@tabler/icons';
@@ -28,7 +28,7 @@ export function TimeEntryRow(props: TimeEntryRowProps) {
     }
 
     return (
-        <Card shadow="sm" p="xs" mt="xs">
+        <Box>
             <Box sx={(theme) => ({
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -69,7 +69,7 @@ export function TimeEntryRow(props: TimeEntryRowProps) {
                 <Box sx={{ width: '65px' }}>
                     <strong>
                         {timeEntry.end ? (
-                            toDuration(timeEntry.start, timeEntry.end)
+                            toDuration(timeEntry.start, timeEntry.end).format('HH:mm:ss')
                         ) : (
                             <Timer start={timeEntry.start} end={new Date()} />
                         )}
@@ -107,6 +107,6 @@ export function TimeEntryRow(props: TimeEntryRowProps) {
                     </Menu>
                 </Box>
             </Box>
-        </Card>
+        </Box>
     );
 }
