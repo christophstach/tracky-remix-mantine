@@ -12,8 +12,10 @@ import {
 import { setLocale } from 'yup';
 import styles from '~/styles/global.css';
 import dayjs from 'dayjs';
+import 'dayjs/locale/de';
 import duration from 'dayjs/plugin/duration';
 import weekday from 'dayjs/plugin/weekday';
+import localeData from 'dayjs/plugin/localeData'
 import type { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
 import { ServerError } from '~/components/ServerError';
 import type { ColorScheme } from '@mantine/core';
@@ -29,6 +31,9 @@ import { useEffect } from 'react';
 
 dayjs.extend(duration);
 dayjs.extend(weekday);
+dayjs.extend(localeData);
+
+dayjs.locale('de');
 
 setLocale(yupLocale);
 
@@ -108,7 +113,6 @@ export async function loader({ request }: DataFunctionArgs) {
         },
     });
 }
-
 
 
 export default function App() {

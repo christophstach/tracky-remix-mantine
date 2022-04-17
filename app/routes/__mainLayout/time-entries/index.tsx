@@ -9,7 +9,6 @@ import { validateUpdateTimeEntryText } from '~/validators/time-entries/update-ti
 import { Accordion, Box, Card, Divider, Group, Text } from '@mantine/core';
 import dayjs from 'dayjs';
 import CumulatedTimer from '~/components/CumulatedTimer';
-import { IconLayoutDistributeVertical } from '@tabler/icons';
 
 export const handle = {
     breadcrumbs: () => {

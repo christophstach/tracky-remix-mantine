@@ -1,6 +1,6 @@
 import { ActionIcon, Box, Button, Card, MediaQuery } from '@mantine/core';
 import { IconArrowBigLeft, IconDeviceFloppy, IconTrash } from '@tabler/icons';
-import { Link } from '@remix-run/react';
+import { Link, useNavigate } from '@remix-run/react';
 import React from 'react';
 
 export interface BottomActionsProps {
