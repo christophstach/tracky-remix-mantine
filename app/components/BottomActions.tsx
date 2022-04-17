@@ -1,6 +1,5 @@
 import { ActionIcon, Box, Button, Card, MediaQuery } from '@mantine/core';
-import { IconArrowBigLeft, IconDeviceFloppy, IconTrash } from '@tabler/icons';
-import { Link, useNavigate } from '@remix-run/react';
+import { IconDeviceFloppy, IconTrash } from '@tabler/icons';
 import React from 'react';
 
 export interface BottomActionsProps {
@@ -20,25 +19,6 @@ export default function BottomActions(props: BottomActionsProps) {
             mt="md"
             sx={(theme) => ({ display: 'flex', gap: theme.spacing.md })}>
             <Box sx={{ flex: 1 }}>
-                <MediaQuery smallerThan="sm" styles={{ display: 'none' }}>
-                    <Button
-                        leftIcon={<IconArrowBigLeft />}
-                        color="gray"
-                        variant={buttonVariant}
-                        component={Link}
-                        to={props.backLink}>Zurück</Button>
-                </MediaQuery>
-
-                <MediaQuery largerThan="sm" styles={{ display: 'none' }}>
-                    <ActionIcon
-                        color="gray"
-                        size="lg"
-                        variant={buttonVariant}
-                        component={Link}
-                        to={props.backLink}>
-                        <IconArrowBigLeft />
-                    </ActionIcon>
-                </MediaQuery>
 
             </Box>
             {props.showDelete && (

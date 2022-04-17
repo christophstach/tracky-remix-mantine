@@ -45,7 +45,6 @@ interface LoaderReturnType {
         text: string;
         start: string;
         end: string | null | undefined;
-
     }[];
 }
 
@@ -66,7 +65,6 @@ export default function () {
 
     const handleSelectEvent = useCallback(
         (event) => {
-            console.log(event);
             navigate(`/time-entries/${event.id}`);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
