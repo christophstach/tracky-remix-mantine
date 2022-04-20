@@ -38,7 +38,7 @@ const useStyles = createStyles((theme) => {
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
                 whiteSpace: 'nowrap',
-                '&:first-child': {
+                '&:first-of-type': {
                     userSelect: 'none',
                     padding: theme.spacing.xs * 0.5,
                 },
@@ -50,7 +50,7 @@ const useStyles = createStyles((theme) => {
                 borderWidth: '1px',
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
-                '&:first-child': {
+                '&:first-of-type': {
                     userSelect: 'none',
                     padding: theme.spacing.xs * 0.5,
                 },
