@@ -39,8 +39,8 @@ const useStyles = createStyles((theme) => {
             color: theme.colorScheme === 'light' ? theme.colors.gray[7] : theme.colors.gray[4],
         },
         day: {
-            padding: 0,
             borderColor,
+            padding: 0,
             borderWidth: '1px',
             borderStyle: 'solid',
             width: 'calc(100% / 7)',
