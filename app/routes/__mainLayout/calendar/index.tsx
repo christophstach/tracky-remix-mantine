@@ -4,7 +4,8 @@ import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
 import { db } from '~/services/db.server';
 import { useLoaderData, useNavigate } from '@remix-run/react';
-import Calendar, { CalendarEntry } from '~/components/Calendar';
+import CalendarMonthView from '~/components/calendar/CalendarMonthView';
+import type { CalendarEntry } from '~/components/calendar';
 
 
 export async function loader({ request }: DataFunctionArgs) {
@@ -50,7 +51,7 @@ export default function () {
 
     return (
         <Card shadow="sm" p="md">
-            <Calendar
+            <CalendarMonthView
                 onEntryClick={handleEntryClick}
                 entries={loaderData.timeEntries.map((entry) => {
                     return {

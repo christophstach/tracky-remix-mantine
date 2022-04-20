@@ -1,6 +1,7 @@
 import { createStyles } from '@mantine/core';
 import dayjs from 'dayjs';
 import { range } from 'lodash';
+import { CalendarEntry } from '~/components/calendar/index';
 
 const useStyles = createStyles((theme) => {
     const borderColor = theme.colorScheme === 'light' ? theme.colors.gray[4] : theme.colors.gray[8];
@@ -96,19 +97,14 @@ const useStyles = createStyles((theme) => {
     };
 });
 
-export interface CalendarEntry {
-    id: string;
-    start: string;
-    end: string;
-    title: string;
-}
+
 
 interface CalendarProps {
     entries: CalendarEntry[];
     onEntryClick: (entry: CalendarEntry) => void;
 }
 
-export default function Calendar(props: CalendarProps) {
+export default function CalendarMonthView(props: CalendarProps) {
     const { classes, cx } = useStyles();
 
     const firstWeek = dayjs().startOf('month').week();
