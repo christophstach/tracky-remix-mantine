@@ -103,6 +103,7 @@ interface CalendarWeekViewProps {
     dayStartHour: number;
     dayEndHour: number;
     week: number;
+    noTitleText: string;
 }
 
 export default function CalendarWeekView(props: CalendarWeekViewProps) {
@@ -188,7 +189,7 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                                                             key={entry.id}
                                                             className={classes.entry}
                                                             style={{ top: `${dayjs(entry.start).minute() / 60 * 200}%` }}>
-                                                            {entry.title ? entry.title : <em>Kein Titel</em>}
+                                                            {entry.title ? entry.title : <em>{props.noTitleText}</em>}
                                                         </div>
                                                     );
                                                 })}

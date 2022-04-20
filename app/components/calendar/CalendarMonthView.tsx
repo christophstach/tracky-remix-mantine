@@ -127,6 +127,7 @@ interface CalendarMonthViewProps {
     entries: CalendarEntry[];
     onEntryClick: (entry: CalendarEntry) => void;
     month: number;
+    noTitleText: string;
 }
 
 export default function CalendarMonthView(props: CalendarMonthViewProps) {
@@ -211,7 +212,7 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
                                                                 {dayjs(entry.start).format('HH:mm')}
                                                             </div>
                                                             <div className={classes.entryTitle}>
-                                                                {entry.title}
+                                                                {entry.title ? entry.title : <em>{props.noTitleText}</em>}
                                                             </div>
                                                         </li>
                                                     );

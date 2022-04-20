@@ -1,4 +1,4 @@
-import { ActionIcon, Badge, Box, Button, Card, Group, Tabs } from '@mantine/core';
+import { ActionIcon, Card, Group, Tabs } from '@mantine/core';
 import type { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
@@ -74,29 +74,33 @@ export default function () {
     return (
         <Card shadow="sm" p="md" sx={{ position: 'relative' }}>
             <Tabs>
-                <Tabs.Tab label="Woche">
+                <Tabs.Tab label="Woche" color="indigo">
                     <Group align="stretch" sx={(theme) => {
                         return {
                             position: 'absolute',
                             top: theme.spacing.md,
-                            right: theme.spacing.md
+                            right: theme.spacing.md,
+                            gap: 0,
                         };
                     }}>
                         <ActionIcon
                             onClick={handlePreviousWeek}
                             variant="light"
-                            size="lg"
+                            size="md"
                             color="indigo"
+                            sx={{ borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                         ><IconChevronsLeft size={18} /></ActionIcon>
                         <ActionIcon
                             onClick={handleNextWeek}
                             variant="light"
-                            size="lg"
+                            size="md"
                             color="indigo"
+                            sx={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 0 }}
                         ><IconChevronsRight size={18} /></ActionIcon>
                     </Group>
 
                     <CalendarWeekView
+                        noTitleText="Keine Beschreibung"
                         week={week}
                         dayStartHour={8}
                         dayEndHour={20}
@@ -115,24 +119,28 @@ export default function () {
                         return {
                             position: 'absolute',
                             top: theme.spacing.md,
-                            right: theme.spacing.md
+                            right: theme.spacing.md,
+                            gap: 0,
                         };
                     }}>
                         <ActionIcon
                             onClick={handlePreviousMonth}
                             variant="light"
-                            size="lg"
+                            size="md"
                             color="indigo"
+                            sx={{ borderBottomRightRadius: 0, borderTopRightRadius: 0 }}
                         ><IconChevronsLeft size={18} /></ActionIcon>
                         <ActionIcon
                             onClick={handleNextMonth}
                             variant="light"
-                            size="lg"
+                            size="md"
                             color="indigo"
+                            sx={{ borderBottomLeftRadius: 0, borderTopLeftRadius: 0 }}
                         ><IconChevronsRight size={18} /></ActionIcon>
                     </Group>
 
                     <CalendarMonthView
+                        noTitleText="Keine Beschreibung"
                         month={month}
                         onEntryClick={handleEntryClick}
                         entries={loaderData.timeEntries.map((entry) => {
