@@ -73,8 +73,8 @@ export default function () {
 
     return (
         <Card shadow="sm" p="md" sx={{ position: 'relative' }}>
-            <Tabs>
-                <Tabs.Tab label="Woche" color="indigo">
+            <Tabs color="indigo">
+                <Tabs.Tab label="Woche">
                     <Group align="stretch" sx={(theme) => {
                         return {
                             position: 'absolute',
