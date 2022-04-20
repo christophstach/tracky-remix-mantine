@@ -1,7 +1,7 @@
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Button, Center, Container, createStyles, Group, Text, Title } from '@mantine/core';
 import { MantineTheme } from '~/components/MantineTheme';
-import { Link, Links, LiveReload, Meta, Scripts, ScrollRestoration, } from '@remix-run/react';
+import { Links, LiveReload, Meta, Scripts, ScrollRestoration, } from '@remix-run/react';
 
 
 const useStyles = createStyles((theme) => ({
@@ -51,21 +51,20 @@ interface ServerErrorProps {
     statusCode: number
     title: string;
     description: ReactElement | string;
-
 }
 
 export function ServerError(props: ServerErrorProps) {
-    const { classes } = useStyles();
+    const { classes, theme } = useStyles();
 
     return (
-        <html style={{height: '100%'}}>
+        <html style={{ height: '100%' }}>
         <head>
             <title>Oops!</title>
             <Meta />
             <Links />
         </head>
-        <body style={{height: '100%'}}>
-        <MantineTheme>
+        <body style={{ height: '100%' }}>
+        <MantineTheme colorScheme={theme.colorScheme}>
             <Center className={classes.root}>
                 <Container>
                     <div className={classes.label}>{props.statusCode}</div>

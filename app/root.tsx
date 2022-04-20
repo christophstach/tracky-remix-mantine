@@ -16,6 +16,7 @@ import 'dayjs/locale/de';
 import duration from 'dayjs/plugin/duration';
 import weekday from 'dayjs/plugin/weekday';
 import localeData from 'dayjs/plugin/localeData'
+import weekOfYear from 'dayjs/plugin/weekOfYear';
 import type { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
 import { ServerError } from '~/components/ServerError';
 import type { ColorScheme } from '@mantine/core';
@@ -32,6 +33,7 @@ import { useEffect } from 'react';
 dayjs.extend(duration);
 dayjs.extend(weekday);
 dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
 
 dayjs.locale('de');
 

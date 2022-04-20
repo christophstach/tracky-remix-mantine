@@ -1,16 +1,19 @@
-import { ReactNode } from 'react';
-import { ColorScheme, ColorSchemeProvider, MantineProvider } from '@mantine/core';
+import type { ReactNode } from 'react';
+import type { ColorScheme } from '@mantine/core';
+import { ColorSchemeProvider, MantineProvider } from '@mantine/core';
 
 
 interface MantineThemeProps {
     colorScheme: ColorScheme;
     children: ReactNode;
-    changeColorScheme: (colorTheme: ColorScheme) => void;
+    changeColorScheme?: (colorTheme: ColorScheme) => void;
 }
 
 export function MantineTheme(props: MantineThemeProps) {
     function handleToggleColorScheme(colorScheme: ColorScheme) {
-        props.changeColorScheme(colorScheme);
+        if (props.changeColorScheme) {
+            props.changeColorScheme(colorScheme);
+        }
     }
 
     return (
