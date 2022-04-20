@@ -38,6 +38,7 @@ const useStyles = createStyles((theme) => {
                 padding: theme.spacing.xs * 0.5,
                 userSelect: 'none',
                 position: 'relative',
+                whiteSpace: 'nowrap',
             }
         },
         bodySecondTr: {
@@ -73,6 +74,7 @@ const useStyles = createStyles((theme) => {
             paddingRight: theme.spacing.xs * 0.5,
             boxShadow: theme.shadows.xs,
             color: theme.colors.gray[4],
+            whiteSpace: 'break-spaces',
             cursor: 'pointer',
             position: 'absolute',
             left: 0,
