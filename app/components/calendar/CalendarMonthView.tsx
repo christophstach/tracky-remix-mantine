@@ -95,8 +95,14 @@ const useStyles = createStyles((theme) => {
                 background: theme.colorScheme === 'light' ? theme.colors.gray[1] : theme.colors.gray[8],
             }
         },
-
-        entryTime: {},
+        entryTime: {
+            ':before': {
+                content: '\'•\'',
+                fontWeight: 'bold',
+                color: theme.colorScheme === 'light' ? theme.colors.indigo : theme.colors.indigo,
+                marginRight: '0.5rem'
+            }
+        },
         entryTitle: {
             fontWeight: 'bold',
         },
@@ -162,7 +168,6 @@ export default function CalendarMonthView(props: CalendarProps) {
                                             {day.date.format('DD')}
                                         </div>
                                         <div className={classes.dayInner}>
-
                                             <ul className={classes.entries}>
                                                 {day.entries.map((entry) => {
                                                     return (
