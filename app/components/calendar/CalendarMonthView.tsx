@@ -38,6 +38,11 @@ const useStyles = createStyles((theme) => {
             paddingRight: theme.spacing.xs,
             color: theme.colorScheme === 'light' ? theme.colors.gray[7] : theme.colors.gray[4],
         },
+        week: {
+
+            verticalAlign: 'top',
+            width: 0,
+        },
         day: {
             borderColor,
             padding: 0,
@@ -71,6 +76,15 @@ const useStyles = createStyles((theme) => {
             paddingLeft: theme.spacing.xs,
             paddingRight: theme.spacing.xs,
             backgroundColor: theme.colorScheme === 'light' ? theme.fn.lighten(theme.colors.gray[1], 0.5) : theme.fn.darken(theme.colors.gray[8], 0.5)
+        },
+        weekNumber: {
+            textAlign: 'right',
+            paddingTop: theme.spacing.xs * 0.1,
+            paddingBottom: theme.spacing.xs * 0.1,
+            paddingLeft: theme.spacing.xs,
+            paddingRight: theme.spacing.xs,
+            backgroundColor: theme.colorScheme === 'light' ? theme.fn.lighten(theme.colors.gray[1], 0.5) : theme.fn.darken(theme.colors.gray[8], 0.5),
+            fontWeight: 'bold',
         },
         entries: {
             padding: 0,
@@ -131,6 +145,7 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
         const currentWeek = currentMonth.add(week, 'week')
 
         return {
+            currentWeek,
             days: range(0, 7).map((day) => {
                 return {
                     currentMonth: currentMonth.isSame(dayjs(), 'month'),
@@ -149,6 +164,10 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
             <table className={classes.table}>
                 <thead>
                 <tr className={classes.headTr}>
+                    <th className={classes.th}>
+                        {currentMonth.format('YYYY')}<br />
+                        <small>{currentMonth.format('MMMM')}</small>
+                    </th>
                     <th className={classes.th}>{currentMonth.weekday(0).format('dddd')}</th>
                     <th className={classes.th}>{currentMonth.weekday(1).format('dddd')}</th>
                     <th className={classes.th}>{currentMonth.weekday(2).format('dddd')}</th>
@@ -162,6 +181,12 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
                 {weeks.map((week, weekIndex) => {
                     return (
                         <tr key={weekIndex} className={classes.bodyTr}>
+                            <td className={classes.week}>
+                                <div className={classes.weekNumber}>
+                                    {week.currentWeek.week()}
+                                </div>
+
+                            </td>
                             {week.days.map((day, dayIndex) => {
                                 return (
                                     <td

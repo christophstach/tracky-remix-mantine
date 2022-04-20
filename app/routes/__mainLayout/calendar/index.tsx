@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Group, Tabs } from '@mantine/core';
+import { ActionIcon, Badge, Box, Button, Card, Group, Tabs } from '@mantine/core';
 import type { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
@@ -82,18 +82,18 @@ export default function () {
                             right: theme.spacing.md
                         };
                     }}>
-                        <Button
+                        <ActionIcon
                             onClick={handlePreviousWeek}
                             variant="light"
-                            size="xs"
-                            leftIcon={<IconChevronsLeft size={18} />}
-                        >Zurück</Button>
-                        <Button
+                            size="lg"
+                            color="indigo"
+                        ><IconChevronsLeft size={18} /></ActionIcon>
+                        <ActionIcon
                             onClick={handleNextWeek}
                             variant="light"
-                            size="xs"
-                            rightIcon={<IconChevronsRight size={18} />}
-                        >Vor</Button>
+                            size="lg"
+                            color="indigo"
+                        ><IconChevronsRight size={18} /></ActionIcon>
                     </Group>
 
                     <CalendarWeekView
@@ -118,21 +118,18 @@ export default function () {
                             right: theme.spacing.md
                         };
                     }}>
-                        <Button
+                        <ActionIcon
                             onClick={handlePreviousMonth}
                             variant="light"
-                            size="xs"
-                            leftIcon={<IconChevronsLeft size={18} />}
-                        >Zurück</Button>
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '150px', justifyContent: 'center' }}>
-                            <strong>{dayjs().month(month).format('MMMM YYYY')}</strong>
-                        </Box>
-                        <Button
+                            size="lg"
+                            color="indigo"
+                        ><IconChevronsLeft size={18} /></ActionIcon>
+                        <ActionIcon
                             onClick={handleNextMonth}
                             variant="light"
-                            size="xs"
-                            rightIcon={<IconChevronsRight size={18} />}
-                        >Vor</Button>
+                            size="lg"
+                            color="indigo"
+                        ><IconChevronsRight size={18} /></ActionIcon>
                     </Group>
 
                     <CalendarMonthView
@@ -147,8 +144,6 @@ export default function () {
                     />
                 </Tabs.Tab>
             </Tabs>
-
-
         </Card>
     );
 }
