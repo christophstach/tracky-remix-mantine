@@ -38,11 +38,10 @@ const useStyles = createStyles((theme) => {
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
                 whiteSpace: 'nowrap',
-            },
-
-            'td:first-Child': {
-                userSelect: 'none',
-                padding: theme.spacing.xs * 0.5,
+                '&:first-child': {
+                    userSelect: 'none',
+                    padding: theme.spacing.xs * 0.5,
+                },
             },
         },
         bodySecondTr: {
@@ -51,11 +50,10 @@ const useStyles = createStyles((theme) => {
                 borderWidth: '1px',
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
-            },
-
-            'td:first-Child': {
-                userSelect: 'none',
-                padding: theme.spacing.xs * 0.5,
+                '&:first-child': {
+                    userSelect: 'none',
+                    padding: theme.spacing.xs * 0.5,
+                },
             },
         },
         th: {
