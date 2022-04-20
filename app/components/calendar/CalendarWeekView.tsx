@@ -87,7 +87,11 @@ const useStyles = createStyles((theme) => {
         },
         entryAnchor: {
             position: 'relative',
-        }
+        },
+        today: {
+            backgroundColor: theme.colorScheme === 'light' ? theme.colors.indigo[0] : theme.fn.darken(theme.colors.indigo[9], 0.8),
+        },
+        notToday: {},
     };
 });
 
@@ -107,6 +111,7 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
             days: range(0, 7).map((weekday) => {
                 return {
                     day: weekday,
+                    today: dayjs().weekday(weekday).isSame(dayjs(), 'day'),
                     entries: props.entries.filter((entry) => {
                         const now = dayjs().weekday(weekday).hour(hour).minute(0).second(0).millisecond(0);
 
@@ -142,7 +147,7 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                                 <td>{hour.hour} Uhr</td>
                                 {hour.days.map((day) => {
                                     return (
-                                        <td key={day.day}>
+                                        <td key={day.day} className={day.today ? classes.today : undefined}>
                                             <div className={classes.entryAnchor}>
                                                 {day.entries.map((entry) => {
                                                     return (
@@ -164,7 +169,7 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                                 <td>&nbsp;</td>
                                 {hour.days.map((day) => {
                                     return (
-                                        <td key={day.day}>
+                                        <td key={day.day} className={day.today ? classes.today : undefined}>
 
                                         </td>
                                     );

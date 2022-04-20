@@ -64,7 +64,6 @@ const useStyles = createStyles((theme) => {
         today: {
             backgroundColor: theme.colorScheme === 'light' ? theme.colors.indigo[0] : theme.fn.darken(theme.colors.indigo[9], 0.8),
         },
-        notToday: {},
         dayNumber: {
             textAlign: 'right',
             paddingTop: theme.spacing.xs * 0.1,
@@ -162,7 +161,7 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
                                         className={cx(
                                             classes.day,
                                             day.currentMonth ? classes.dayCurrentMonth : classes.dayOtherMonth,
-                                            day.today ? classes.today : classes.notToday
+                                            day.today ? classes.today : undefined
                                         )}>
                                         <div className={classes.dayNumber}>
                                             {day.date.format('DD')}
