@@ -80,7 +80,7 @@ const useStyles = createStyles((theme) => {
         },
         entry: {
             display: 'flex',
-            borderRadius: theme.radius.xs,
+            borderRadius: theme.radius.sm,
             marginBottom: theme.spacing.xs * 0.3,
             fontSize: theme.fontSizes.xs,
             gap: theme.spacing.xs,
@@ -110,12 +110,12 @@ const useStyles = createStyles((theme) => {
 });
 
 
-interface CalendarProps {
+interface CalendarMonthViewProps {
     entries: CalendarEntry[];
     onEntryClick: (entry: CalendarEntry) => void;
 }
 
-export default function CalendarMonthView(props: CalendarProps) {
+export default function CalendarMonthView(props: CalendarMonthViewProps) {
     const { classes, cx } = useStyles();
 
     const firstWeek = dayjs().startOf('month').week();
