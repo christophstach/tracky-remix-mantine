@@ -30,16 +30,20 @@ const useStyles = createStyles((theme) => {
             borderStyle: 'solid',
             borderBottomStyle: 'dotted',
 
+
+
             td: {
                 borderColor,
                 borderWidth: '1px',
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
-                padding: theme.spacing.xs * 0.5,
-                userSelect: 'none',
-                position: 'relative',
                 whiteSpace: 'nowrap',
-            }
+            },
+
+            'td:first-Child': {
+                userSelect: 'none',
+                padding: theme.spacing.xs * 0.5,
+            },
         },
         bodySecondTr: {
             td: {
@@ -47,9 +51,12 @@ const useStyles = createStyles((theme) => {
                 borderWidth: '1px',
                 borderRightStyle: 'dotted',
                 fontSize: theme.fontSizes.xs,
-                padding: theme.spacing.xs * 0.5,
+            },
+
+            'td:first-Child': {
                 userSelect: 'none',
-            }
+                padding: theme.spacing.xs * 0.5,
+            },
         },
         th: {
             borderColor,
@@ -76,10 +83,13 @@ const useStyles = createStyles((theme) => {
             color: theme.colors.gray[4],
             whiteSpace: 'break-spaces',
             cursor: 'pointer',
+            userSelect: 'text',
             position: 'absolute',
             left: 0,
+        },
+        entryAnchor: {
+            position: 'relative',
         }
-
     };
 });
 
@@ -135,17 +145,19 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                                 {hour.days.map((day) => {
                                     return (
                                         <td key={day.day}>
-                                            {day.entries.map((entry) => {
-                                                return (
-                                                    <div
-                                                        onClick={() => props.onEntryClick(entry)}
-                                                        key={entry.id}
-                                                        className={classes.entry}
-                                                        style={{ top: `${dayjs(entry.start).minute() / 60 * 200}%` }}>
-                                                        {entry.title ? entry.title : <em>Kein Titel</em>}
-                                                    </div>
-                                                );
-                                            })}
+                                            <div className={classes.entryAnchor}>
+                                                {day.entries.map((entry) => {
+                                                    return (
+                                                        <div
+                                                            onClick={() => props.onEntryClick(entry)}
+                                                            key={entry.id}
+                                                            className={classes.entry}
+                                                            style={{ top: `${dayjs(entry.start).minute() / 60 * 200}%` }}>
+                                                            {entry.title ? entry.title : <em>Kein Titel</em>}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </td>
                                     );
                                 })}
