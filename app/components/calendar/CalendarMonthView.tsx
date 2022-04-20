@@ -44,6 +44,8 @@ const useStyles = createStyles((theme) => {
             borderWidth: '1px',
             borderStyle: 'solid',
             width: 'calc(100% / 7)',
+            minWidth: 'calc(100% / 7)',
+            maxWidth: 'calc(100% / 7)',
             height: '140px',
             verticalAlign: 'top'
         },
