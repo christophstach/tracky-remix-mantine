@@ -17,6 +17,7 @@ import duration from 'dayjs/plugin/duration';
 import weekday from 'dayjs/plugin/weekday';
 import localeData from 'dayjs/plugin/localeData'
 import weekOfYear from 'dayjs/plugin/weekOfYear';
+import isLeapYear from 'dayjs/plugin/isLeapYear';
 import type { HtmlMetaDescriptor } from '@remix-run/server-runtime/routeModules';
 import { ServerError } from '~/components/ServerError';
 import type { ColorScheme } from '@mantine/core';
@@ -34,6 +35,7 @@ dayjs.extend(duration);
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.extend(weekOfYear);
+dayjs.extend(isLeapYear);
 
 dayjs.locale('de');
 

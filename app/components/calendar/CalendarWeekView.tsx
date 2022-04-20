@@ -31,7 +31,6 @@ const useStyles = createStyles((theme) => {
             borderBottomStyle: 'dotted',
 
 
-
             td: {
                 borderColor,
                 borderWidth: '1px',
@@ -41,6 +40,7 @@ const useStyles = createStyles((theme) => {
                 '&:first-of-type': {
                     userSelect: 'none',
                     padding: theme.spacing.xs * 0.5,
+                    width: 0
                 },
             },
         },
@@ -53,6 +53,7 @@ const useStyles = createStyles((theme) => {
                 '&:first-of-type': {
                     userSelect: 'none',
                     padding: theme.spacing.xs * 0.5,
+                    width: 0
                 },
             },
         },
@@ -101,19 +102,29 @@ interface CalendarWeekViewProps {
     onEntryClick: (entry: CalendarEntry) => void;
     dayStartHour: number;
     dayEndHour: number;
+    week: number;
 }
 
 export default function CalendarWeekView(props: CalendarWeekViewProps) {
     const { classes } = useStyles();
+    const currentWeek = dayjs()
+        .week(props.week)
+        .hour(0)
+        .minute(0)
+        .second(0)
+        .millisecond(0)
+        .startOf('week');
+
     const hours = range(props.dayStartHour, props.dayEndHour).map((hour) => {
         return {
             hour: dayjs().hour(hour).minute(0).second(0).millisecond(0).format('HH:mm'),
             days: range(0, 7).map((weekday) => {
+                const today = currentWeek.weekday(weekday);
+
                 return {
-                    day: weekday,
-                    today: dayjs().weekday(weekday).isSame(dayjs(), 'day'),
+                    today: today.isSame(dayjs(), 'day'),
                     entries: props.entries.filter((entry) => {
-                        const now = dayjs().weekday(weekday).hour(hour).minute(0).second(0).millisecond(0);
+                        const now = today.hour(hour);
 
                         return dayjs(entry.start).isSame(now, 'day')
                             && dayjs(entry.start).isSame(now, 'hour');
@@ -130,13 +141,34 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                 <thead>
                 <tr className={classes.headTr}>
                     <th className={classes.th}></th>
-                    <th className={classes.th}>{dayjs().weekday(0).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(1).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(2).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(3).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(4).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(5).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(6).format('dddd')}</th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(0).format('dddd')}<br />
+                        <small>{currentWeek.weekday(0).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(1).format('dddd')}<br />
+                        <small>{currentWeek.weekday(1).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(2).format('dddd')}<br />
+                        <small>{currentWeek.weekday(2).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(3).format('dddd')}<br />
+                        <small>{currentWeek.weekday(3).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(4).format('dddd')}<br />
+                        <small>{currentWeek.weekday(4).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(5).format('dddd')}<br />
+                        <small>{currentWeek.weekday(5).format('DD.MM.YYYY')}</small>
+                    </th>
+                    <th className={classes.th}>
+                        {currentWeek.weekday(6).format('dddd')}<br />
+                        <small>{currentWeek.weekday(6).format('DD.MM.YYYY')}</small>
+                    </th>
                 </tr>
                 </thead>
                 <tbody>
@@ -145,9 +177,9 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                         <Fragment key={hour.hour}>
                             <tr className={classes.bodyFirstTr}>
                                 <td>{hour.hour} Uhr</td>
-                                {hour.days.map((day) => {
+                                {hour.days.map((day, dayIndex) => {
                                     return (
-                                        <td key={day.day} className={day.today ? classes.today : undefined}>
+                                        <td key={dayIndex} className={day.today ? classes.today : undefined}>
                                             <div className={classes.entryAnchor}>
                                                 {day.entries.map((entry) => {
                                                     return (
@@ -167,9 +199,9 @@ export default function CalendarWeekView(props: CalendarWeekViewProps) {
                             </tr>
                             <tr className={classes.bodySecondTr}>
                                 <td>&nbsp;</td>
-                                {hour.days.map((day) => {
+                                {hour.days.map((day, index) => {
                                     return (
-                                        <td key={day.day} className={day.today ? classes.today : undefined}>
+                                        <td key={index} className={day.today ? classes.today : undefined}>
 
                                         </td>
                                     );

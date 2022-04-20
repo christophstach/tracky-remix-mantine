@@ -112,24 +112,32 @@ const useStyles = createStyles((theme) => {
 interface CalendarMonthViewProps {
     entries: CalendarEntry[];
     onEntryClick: (entry: CalendarEntry) => void;
+    month: number;
 }
 
 export default function CalendarMonthView(props: CalendarMonthViewProps) {
     const { classes, cx } = useStyles();
 
-    const firstWeek = dayjs().startOf('month').week();
-    const lastWeek = dayjs().endOf('month').week();
-    const weeks = range(firstWeek, lastWeek + 1).map((week) => {
+    const currentMonth = dayjs()
+        .month(props.month)
+        .hour(0)
+        .minute(0)
+        .second(0)
+        .millisecond(0)
+        .startOf('month');
+
+
+    const weeks = range(0, 5).map((week) => {
+        const currentWeek = currentMonth.add(week, 'week')
+
         return {
-            week,
             days: range(0, 7).map((day) => {
                 return {
-                    day,
-                    currentMonth: dayjs().week(week).weekday(day).month() === dayjs().month(),
-                    today: dayjs().week(week).weekday(day).isSame(dayjs(), 'day'),
-                    date: dayjs().week(week).weekday(day),
+                    currentMonth: currentMonth.isSame(dayjs(), 'month'),
+                    today: currentMonth.isSame(dayjs(), 'day'),
+                    date: currentWeek.weekday(day),
                     entries: props.entries.filter((entry) => {
-                        return dayjs(entry.start).isSame(dayjs().week(week).weekday(day), 'day');
+                        return dayjs(entry.start).isSame(currentWeek.weekday(day), 'day');
                     })
                 };
             })
@@ -141,23 +149,23 @@ export default function CalendarMonthView(props: CalendarMonthViewProps) {
             <table className={classes.table}>
                 <thead>
                 <tr className={classes.headTr}>
-                    <th className={classes.th}>{dayjs().weekday(0).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(1).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(2).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(3).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(4).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(5).format('dddd')}</th>
-                    <th className={classes.th}>{dayjs().weekday(6).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(0).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(1).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(2).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(3).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(4).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(5).format('dddd')}</th>
+                    <th className={classes.th}>{currentMonth.weekday(6).format('dddd')}</th>
                 </tr>
                 </thead>
                 <tbody>
-                {weeks.map((week) => {
+                {weeks.map((week, weekIndex) => {
                     return (
-                        <tr key={week.week} className={classes.bodyTr}>
-                            {week.days.map((day) => {
+                        <tr key={weekIndex} className={classes.bodyTr}>
+                            {week.days.map((day, dayIndex) => {
                                 return (
                                     <td
-                                        key={day.day}
+                                        key={dayIndex}
                                         className={cx(
                                             classes.day,
                                             day.currentMonth ? classes.dayCurrentMonth : classes.dayOtherMonth,
