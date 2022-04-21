@@ -3,13 +3,14 @@ import type { DataFunctionArgs } from '@remix-run/node';
 import { authenticator } from '~/services/auth.server';
 import { forbidden } from 'remix-utils';
 import { db } from '~/services/db.server';
-import { useLoaderData, useNavigate } from '@remix-run/react';
+import { useNavigate } from '@remix-run/react';
 import type { CalendarEntry } from '~/components/calendar';
 import CalendarWeekView from '~/components/calendar/CalendarWeekView';
 import CalendarMonthView from '~/components/calendar/CalendarMonthView';
 import { IconChevronsLeft, IconChevronsRight } from '@tabler/icons';
 import { useState } from 'react';
 import dayjs from 'dayjs';
+import { json, useLoaderData } from 'superjson-remix';
 
 
 export async function loader({ request }: DataFunctionArgs) {
@@ -31,14 +32,14 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
-    return { timeEntries };
+    return json<LoaderReturnType>({ timeEntries });
 }
 
 interface TimeEntry {
     id: string;
     text: string;
-    start: string;
-    end: string;
+    start: Date;
+    end: Date | null | undefined;
 }
 
 interface LoaderReturnType {
@@ -109,6 +110,7 @@ export default function () {
                             return {
                                 ...entry,
                                 title: entry.text,
+                                end: entry.end!,
                             }
                         })}
                     />
@@ -147,6 +149,7 @@ export default function () {
                             return {
                                 ...entry,
                                 title: entry.text,
+                                end: entry.end!,
                             }
                         })}
                     />

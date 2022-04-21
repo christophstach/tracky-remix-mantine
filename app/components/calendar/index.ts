@@ -1,6 +1,6 @@
 export interface CalendarEntry {
     id: string;
-    start: string;
-    end: string;
+    start: Date;
+    end: Date;
     title?: string;
 }

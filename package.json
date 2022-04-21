@@ -42,6 +42,7 @@
     "remix-auth": "^3.2.1",
     "remix-auth-form": "^1.1.1",
     "remix-utils": "^3.0.0",
+    "superjson-remix": "^0.1.2",
     "yup": "^0.32.11"
   },
   "devDependencies": {

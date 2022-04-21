@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react';
 import { toDuration } from '~/utils/helpers';
 import type { Duration } from 'dayjs/plugin/duration';
 import { SyncedTimerContext } from '~/contexts/synced-timer';
+import { ClientOnly } from 'remix-utils';
 
 interface StartEndDuration {
     start: Date;
@@ -50,5 +51,9 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     }, [ props.durations ]);
 
 
-    return <span>{time}</span>;
+    return (
+        <ClientOnly fallback={defaultTime}>
+            {() => time}
+        </ClientOnly>
+    );
 }

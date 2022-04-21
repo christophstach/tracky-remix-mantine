@@ -1,5 +1,4 @@
 import type { DataFunctionArgs } from '@remix-run/node';
-import { useLoaderData } from '@remix-run/react';
 import { badRequest, forbidden, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { db } from '~/services/db.server';
@@ -9,6 +8,8 @@ import { validateUpdateTimeEntryText } from '~/validators/time-entries/update-ti
 import { Accordion, Box, Card, Divider, Group, Text } from '@mantine/core';
 import dayjs from 'dayjs';
 import CumulatedTimer from '~/components/CumulatedTimer';
+import type { Client, Project, Task, TimeEntry } from '@prisma/client';
+import { json, useLoaderData } from 'superjson-remix';
 
 export const handle = {
     breadcrumbs: () => {
@@ -113,6 +114,136 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     });
 
+    const today = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        include: {
+            task: {
+                include: {
+                    project: {
+                        include: {
+                            client: true
+                        }
+                    }
+                }
+            }
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('day')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('day')
+                    .toDate()
+            }
+        }
+    });
+
+    const yesterday = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        include: {
+            task: {
+                include: {
+                    project: {
+                        include: {
+                            client: true
+                        }
+                    }
+                }
+            }
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('day')
+                    .subtract(1, 'days')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('day')
+                    .subtract(1, 'days')
+                    .toDate()
+            }
+        }
+    });
+
+    const currentWeek = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('week')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('week')
+                    .toDate()
+            }
+        }
+    });
+
+    const lastWeek = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('week')
+                    .subtract(1, 'weeks')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('week')
+                    .subtract(1, 'weeks')
+                    .toDate()
+            }
+        }
+    });
+
+    const currentMonth = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('month')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('month')
+                    .toDate()
+            }
+        }
+    });
+
+    const lastMonth = await db.timeEntry.findMany({
+        orderBy: {
+            start: 'desc'
+        },
+        where: {
+            userId,
+            start: {
+                gte: dayjs(new Date())
+                    .startOf('month')
+                    .subtract(1, 'month')
+                    .toDate(),
+                lt: dayjs(new Date())
+                    .endOf('month')
+                    .subtract(1, 'month')
+                    .toDate()
+            }
+        }
+    });
+
     const weekdays = [
         'Sonntag',
         'Montag',
@@ -126,77 +257,11 @@ export async function loader({ request }: DataFunctionArgs) {
     const days = [
         {
             label: 'Heute',
-            timeEntries: await db.timeEntry.findMany({
-                orderBy: {
-                    start: 'desc'
-                },
-                include: {
-                    task: {
-                        include: {
-                            project: {
-                                include: {
-                                    client: true
-                                }
-                            }
-                        }
-                    }
-                },
-                where: {
-                    userId,
-                    start: {
-                        gte: dayjs(new Date())
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
-                            .toDate(),
-                        lt: dayjs(new Date())
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
-                            .toDate()
-                    }
-                }
-            })
+            timeEntries: today
         },
         {
             label: 'Gestern',
-            timeEntries: await db.timeEntry.findMany({
-                orderBy: {
-                    start: 'desc'
-                },
-                include: {
-                    task: {
-                        include: {
-                            project: {
-                                include: {
-                                    client: true
-                                }
-                            }
-                        }
-                    }
-                },
-                where: {
-                    userId,
-                    start: {
-                        gte: dayjs(new Date())
-                            .subtract(1, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
-                            .toDate(),
-                        lt: dayjs(new Date())
-                            .subtract(1, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
-                            .toDate()
-                    }
-                }
-            })
+            timeEntries: yesterday
         },
         {
             label: weekdays[dayjs(new Date()).subtract(2, 'days').weekday()],
@@ -219,18 +284,12 @@ export async function loader({ request }: DataFunctionArgs) {
                     userId,
                     start: {
                         gte: dayjs(new Date())
+                            .startOf('day')
                             .subtract(2, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
                             .toDate(),
                         lt: dayjs(new Date())
+                            .endOf('day')
                             .subtract(2, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
                             .toDate()
                     }
                 }
@@ -257,18 +316,12 @@ export async function loader({ request }: DataFunctionArgs) {
                     userId,
                     start: {
                         gte: dayjs(new Date())
+                            .startOf('day')
                             .subtract(3, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
                             .toDate(),
                         lt: dayjs(new Date())
+                            .endOf('day')
                             .subtract(3, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
                             .toDate()
                     }
                 }
@@ -295,18 +348,12 @@ export async function loader({ request }: DataFunctionArgs) {
                     userId,
                     start: {
                         gte: dayjs(new Date())
+                            .startOf('day')
                             .subtract(4, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
                             .toDate(),
                         lt: dayjs(new Date())
+                            .endOf('day')
                             .subtract(4, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
                             .toDate()
                     }
                 }
@@ -333,18 +380,12 @@ export async function loader({ request }: DataFunctionArgs) {
                     userId,
                     start: {
                         gte: dayjs(new Date())
+                            .startOf('day')
                             .subtract(5, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
                             .toDate(),
                         lt: dayjs(new Date())
+                            .endOf('day')
                             .subtract(5, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
                             .toDate()
                     }
                 }
@@ -371,18 +412,12 @@ export async function loader({ request }: DataFunctionArgs) {
                     userId,
                     start: {
                         gte: dayjs(new Date())
+                            .startOf('day')
                             .subtract(6, 'days')
-                            .set('hours', 0)
-                            .set('minutes', 0)
-                            .set('seconds', 0)
-                            .set('milliseconds', 0)
                             .toDate(),
                         lt: dayjs(new Date())
+                            .endOf('day')
                             .subtract(6, 'days')
-                            .set('hours', 23)
-                            .set('minutes', 59)
-                            .set('seconds', 59)
-                            .set('milliseconds', 999)
                             .toDate()
                     }
                 }
@@ -390,18 +425,90 @@ export async function loader({ request }: DataFunctionArgs) {
         }
     ];
 
-    return {
+
+    return json<LoaderReturnType>({
+        today,
+        yesterday,
+        currentWeek,
+        lastWeek,
+        currentMonth,
+        lastMonth,
         timeEntries,
         tasks,
         days: days.filter((day) => day.timeEntries.length > 0)
-    };
+    });
+}
+
+interface LoaderReturnType {
+    today: TimeEntry[];
+    yesterday: TimeEntry[];
+    currentWeek: TimeEntry[];
+    lastWeek: TimeEntry[];
+    currentMonth: TimeEntry[];
+    lastMonth: TimeEntry[];
+    timeEntries: (TimeEntry & {
+        task: (Task & {
+            project: (Project & {
+                client: Client | null | undefined
+            }) | null | undefined
+        }) | null | undefined;
+    })[];
+    tasks: (Task & {
+        project: (Project & {
+            client: Client | null | undefined
+        }) | null | undefined
+    })[];
+    days: {
+        label: string;
+        timeEntries: (TimeEntry & {
+            task: (Task & {
+                project: (Project & {
+                    client: Client | null | undefined
+                }) | null | undefined
+            }) | null | undefined;
+        })[];
+    }[];
 }
 
 export default function TimerIndex() {
-    const loaderData = useLoaderData<InferDataFunction<typeof loader>>();
+    const loaderData = useLoaderData<LoaderReturnType>();
 
     return (
         <>
+            <Card shadow="sm" p="md">
+                <Group position="apart" spacing="xs">
+                    <Box>
+                        <small>
+                            Heute • <CumulatedTimer durations={loaderData.today} />
+                        </small>
+                    </Box>
+                    <Box>
+                        <small>
+                            Gestern • <CumulatedTimer durations={loaderData.yesterday} />
+                        </small>
+                    </Box>
+                    <Box>
+                        <small>
+                            Diese Woche • <CumulatedTimer durations={loaderData.currentWeek} />
+                        </small>
+                    </Box>
+                    <Box>
+                        <small>
+                            Letzte Woche • <CumulatedTimer durations={loaderData.lastWeek} />
+                        </small>
+                    </Box>
+                    <Box>
+                        <small>
+                            Dieser Monat • <CumulatedTimer durations={loaderData.currentMonth} />
+                        </small>
+                    </Box>
+                    <Box>
+                        <small>
+                            Letzter Monat • <CumulatedTimer durations={loaderData.lastMonth} />
+                        </small>
+                    </Box>
+                </Group>
+            </Card>
             {loaderData.days.map((day, dayIndex) => {
                 return (
                     <Card key={dayIndex} shadow="sm" p="md" mt="xs">
@@ -436,7 +543,12 @@ export default function TimerIndex() {
                             >
                                 {day.timeEntries.map((timeEntry, timeEntryIndex) => {
                                     return (
-                                        <Accordion.Item opened key={timeEntry.id} label={timeEntry.text} pb={5}>
+                                        <Accordion.Item
+                                            opened
+                                            key={timeEntry.id}
+                                            label={timeEntry.text || <em>Keine Beschreibung</em>}
+                                            pb={5}
+                                        >
                                             <TimeEntryRow
                                                 key={timeEntry.id}
                                                 timeEntry={timeEntry}

@@ -5,13 +5,14 @@ import { badRequest, forbidden, notFound, redirectBack } from 'remix-utils';
 import { authenticator } from '~/services/auth.server';
 import { setNotification } from '~/services/notification-session.server';
 import { Card, Group, Select, Stack, TextInput } from '@mantine/core';
-import { Form, useActionData, useFetcher, useLoaderData, useParams, useTransition } from '@remix-run/react';
+import { Form, useActionData, useFetcher, useParams, useTransition } from '@remix-run/react';
 import BottomActions from '~/components/BottomActions';
 import { validateUpdateTimeEntry } from '~/validators/time-entries/update-time-entry';
 import { DatePicker, TimeInput } from '@mantine/dates';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import type { Task } from '@prisma/client';
+import { json, useLoaderData } from 'superjson-remix';
 
 
 export async function action({ request, params }: DataFunctionArgs) {
@@ -121,15 +122,15 @@ export async function loader({ params, request }: DataFunctionArgs) {
         }
     });
 
-    return { timeEntry, tasks };
+    return json({ timeEntry, tasks });
 }
 
 interface LoaderReturnType {
     timeEntry: {
         id: string;
         text: string;
-        start: string;
-        end: string | null | undefined;
+        start: Date;
+        end: Date | null | undefined;
         taskId: string | null | undefined;
     };
     tasks: Task[];
@@ -144,14 +145,14 @@ export default function () {
     const loaderData = useLoaderData<LoaderReturnType>();
     const id = params.timeEntryId;
 
-    const [ start, setStart ] = useState<Date | null>(new Date(loaderData.timeEntry.start));
-    const [ end, setEnd ] = useState(loaderData.timeEntry.end ? new Date(loaderData.timeEntry.end) : null);
+    const [ start, setStart ] = useState(new Date(loaderData.timeEntry.start));
+    const [ end, setEnd ] = useState(loaderData.timeEntry.end!);
 
     function handleDelete() {
         fetcher.submit(null, { method: 'delete' });
     }
 
-    function handleChangeStartDate(value: Date | null) {
+    function handleChangeStartDate(value: Date) {
         const current = dayjs(start);
         const date = dayjs(value)
             .set('hour', current.get('hour'))
@@ -162,7 +163,7 @@ export default function () {
         setStart(date.toDate())
     }
 
-    function handleChangeEndDate(value: Date | null) {
+    function handleChangeEndDate(value: Date) {
         const current = dayjs(end);
         const date = dayjs(value)
             .set('hour', current.get('hour'))

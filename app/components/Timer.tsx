@@ -1,6 +1,7 @@
 import { toDuration } from '~/utils/helpers';
 import { useContext, useEffect, useState } from 'react';
 import { SyncedTimerContext } from '~/contexts/synced-timer';
+import { ClientOnly } from 'remix-utils';
 
 interface TimerProps {
     start: Date | null | undefined;
@@ -29,5 +30,9 @@ export default function Timer(props: TimerProps) {
     }, [ props.start ]);
 
 
-    return <span>{time}</span>;
+    return (
+        <ClientOnly fallback={defaultTime}>
+            {() => time}
+        </ClientOnly>
+    );
 }
