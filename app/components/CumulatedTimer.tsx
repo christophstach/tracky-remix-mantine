@@ -34,10 +34,10 @@ export default function CumulatedTimer(props: CumulatedTimerProps) {
     }
 
     useEffect(() => {
-        const hasOpenDuration = props.durations.some((duration) => duration.end === null);
-
         const subscription = syncedTimer.subscribe(() => {
-            if (hasOpenDuration) {
+            if (props.durations.length === 0) {
+                setTime(defaultTime);
+            } else {
                 setTime(toTotalDuration(props.durations).format(format));
             }
         });
