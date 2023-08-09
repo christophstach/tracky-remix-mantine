@@ -35,6 +35,8 @@ export async function action({ request }: DataFunctionArgs) {
     } else {
         return { fieldErrors };
     }
+
+    return null;
 }
 
 export async function loader({ request }: DataFunctionArgs) {

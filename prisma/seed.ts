@@ -7,7 +7,7 @@ async function seed() {
     const users = await createUsers();
     const clients = await createClients(users);
     const projects = await createProjects(users, clients);
-    const tasks = await createTasks(users, projects);
+    await createTasks(users, projects);
 }
 
 seed().then(() => {
